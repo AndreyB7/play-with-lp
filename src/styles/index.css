@@ -13,12 +13,37 @@
     font-weight: 400;
 
     background-color: #242424;
+    color:#fff;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+}
+
+button, input {
+    color: #242424;
+}
+
+button {
+    min-width: 140px;
+    margin-right: 5px;
+    background: #fff;
+    padding: 5px 15px;
+    text-transform: uppercase;
+    border-radius: 5px;
+}
+
+button:disabled {
+    opacity: .5;
+}
+
+.card {
+    cursor:pointer;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 
 @font-face {
@@ -33,7 +58,7 @@
 
 .card-center-letter {
     font-size: 3.5rem;
-    font-family: Celtasmigoria;
+    font-family: 'Celtasmigoria', serif;
 }
 
 .card-center-letter--smaller {
