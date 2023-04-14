@@ -1,4 +1,5 @@
 type Card = {
+    id: string,
     label: string;
     score: number;
 }

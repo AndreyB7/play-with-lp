@@ -1,4 +1,4 @@
-import { getShuffledDeck } from '../../utils/useShuffledDeck';
+import { getShuffledDeck } from '../useShuffledDeck';
 
 const game: Game = { players: [], rounds: [], uid: 'ggg' };
 export default (io, socket) => {
@@ -21,6 +21,10 @@ export default (io, socket) => {
     }
 
     socket.on('game-join', (player: Player) => {
+        if (game.players.some(currentPlayer => currentPlayer.uid === player.uid)) {
+            gameUpdate(game);
+            return;
+        }
         game.players.push(player);
         gameUpdate(game);
     })
@@ -44,6 +48,7 @@ export default (io, socket) => {
 
     socket.on('game-new', () => {
         game.rounds = [];
+        game.players = [];
         gameUpdate(game);
     })
 };
