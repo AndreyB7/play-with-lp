@@ -1,12 +1,15 @@
 import { getShuffledDeck } from '../useShuffledDeck';
 import { v4 as uuidv4 } from 'uuid';
 
-const game: Game = {
+const initGame = {
     players: [],
     rounds: [],
     uid: 'ggg',
     readyPlayers: [],
-};
+    allPlayersReadyToGame: false,
+}
+
+const game: Game = { ...initGame };
 
 export default (io, socket) => {
 
@@ -23,9 +26,10 @@ export default (io, socket) => {
             return;
         }
         player.uid = uuidv4();
-        game.players.push(player);
         socket.emit('player-joined', player);
-        console.log('game-join', game);
+
+        game.players.push(player);
+        game.readyPlayers = game.readyPlayers.filter(x => x !== player.uid);
         gameUpdate(game);
     })
 
@@ -53,6 +57,8 @@ export default (io, socket) => {
     socket.on('game-new', () => {
         game.rounds = [];
         game.players = [];
+        game.readyPlayers = [];
+        game.allPlayersReadyToGame = false;
         gameUpdate(game);
     })
 
@@ -81,6 +87,8 @@ export default (io, socket) => {
         }
 
         game.readyPlayers.push(uid);
+        game.allPlayersReadyToGame = game.readyPlayers.length === game.players.length;
+
         gameUpdate(game);
     })
 

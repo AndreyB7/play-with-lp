@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
 import GameDeck from '../components/GameDeck';
@@ -9,7 +8,7 @@ let socketGame;
 const NewGame = () => {
 
   const [player, setPlayer] = useState<Player>({ uid: '', username: '' });
-  const [game, setGame] = useState<Game>({ players: [], rounds: [], uid: '', readyPlayers: [] });
+  const [game, setGame] = useState<Game>({ players: [], rounds: [], uid: '', readyPlayers: [], allPlayersReadyToGame: false });
 
   useEffect(() => {
     socketInitializer();
@@ -36,13 +35,6 @@ const NewGame = () => {
     return game.players.find(x => x.uid === player.uid) != undefined;
   }, [game, player]);
 
-  const handleClickJoinToGame = () => {
-    if (!inGame) {
-      socketGame.emit('game-join', player);
-      // socketGame.emit('game-ready-to-play', player.uid);
-    }
-  }
-
   const handleClickStartGame = () => {
     socketGame.emit('game-new', player);
   }
@@ -53,12 +45,6 @@ const NewGame = () => {
   const handlePlayerMove = (game: Game) => {
     socketGame.emit('game-move', game);
   }
-
-  // useEffect(() => {
-  //     if (player && socketGame) {
-  //         socketGame.emit('game-join', player);
-  //     }
-  // }, [socketGame, player]);
 
   const isReadyPlayer = useMemo(() => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
@@ -82,8 +68,9 @@ const NewGame = () => {
     <div className='container m-auto'>
       { game.rounds.length
         ? <button onClick={ handleClickStartGame }>Restart Game</button>
-        : <button onClick={ handleClickStartGame }>New Game</button> }
-      <button onClick={ handleClickJoinToGame } disabled={ isReadyPlayer }>I'm Ready</button>
+        : <button onClick={ handleClickStartGame } disabled={!game.allPlayersReadyToGame}>New Game</button> }
+      <button onClick={ () => socketGame.emit('game-ready-to-play', player.uid) } disabled={ isReadyPlayer }>I'm Ready
+      </button>
       { (game.rounds.length > 0 && game.rounds.length < 8)
         ? <button onClick={ handleClickNextRound } disabled={ !inGame }>Next Round</button>
         : <button onClick={ handleClickNextRound } disabled={ !inGame }>Start Round</button> }
