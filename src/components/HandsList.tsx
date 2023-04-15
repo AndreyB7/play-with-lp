@@ -1,5 +1,5 @@
 import LetterCard from "./LetterCard";
-import React, {FC, memo} from "react";
+import React, {FC} from "react";
 
 interface Props {
   hands: {[key: string]: Deck};
@@ -9,11 +9,11 @@ interface Props {
 
 const HandsList: FC<Props> = ({hands, players, isOpen = false}) => (
   <>
-    {Object.keys(hands).map((opponentUid, idx) => {
+    {Object.keys(hands).map((opponentUid) => {
       const cards = hands[opponentUid];
       return (
         <div key={opponentUid} className='opponentHand'>
-          <h3>{(players[opponentUid].username)}</h3>
+          <h3>{players.find(x => x.uid === opponentUid).username}</h3>
           <div className='min-h-40 m-1 flex flex-wrap'>
             {cards.map((card) => (
               <LetterCard key={card.id} isOpen={isOpen} card={card}/>

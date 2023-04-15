@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from 'react';
 import io from 'socket.io-client';
 import GameDeck from '../components/GameDeck';
 import withPrivateRoute from '../components/withPrivateRoute';
-import {log} from "util";
 
 let socketGame;
 

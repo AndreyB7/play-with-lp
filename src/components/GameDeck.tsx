@@ -10,9 +10,9 @@ interface Props {
 }
 
 interface iCards {
-  deck:Deck,
-  table:Deck,
-  playerHand:Deck,
+  deck: Deck,
+  table: Deck,
+  playerHand: Deck,
 }
 
 const GameDeck: FC<Props> = ({game, player, handleMove}) => {
@@ -89,7 +89,7 @@ const GameDeck: FC<Props> = ({game, player, handleMove}) => {
     handleMove(game);
   }
 
-  const opponentsHands = (): {[key:string]:Deck} => {
+  const opponentsHands = (): { [key: string]: Deck } => {
     const hands = {...game.rounds[0].hands};
     delete hands[`${player.uid}`];
     return hands;
@@ -116,7 +116,7 @@ const GameDeck: FC<Props> = ({game, player, handleMove}) => {
                             style={{
                               display: 'flex',
                               userSelect: 'none',
-                              marginRight: `${ part === 'deck' || part === 'table' ? '-110px' : '0'}`,
+                              marginRight: `${part === 'deck' || part === 'table' ? '-110px' : '0'}`,
                               border: snapshot.isDragging ? '1px solid red' : '0',
                               ...provided.draggableProps.style,
                             }}
@@ -135,9 +135,11 @@ const GameDeck: FC<Props> = ({game, player, handleMove}) => {
         </div>
       </DragDropContext>
       {opponentsHands && (
-          <HandsList
-        players={game.players.filter(x => x.uid === player.uid)}
-      hands={opponentsHands()}/>)
+        <HandsList
+          players={game.players.filter(x => x.uid !== player.uid)}
+          hands={opponentsHands()}
+          isOpen={true}
+        />)
       }
     </div>
   );
