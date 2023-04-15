@@ -1,3 +1,4 @@
+import { number } from 'prop-types';
 import React, { useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
 import GameDeck from '../components/GameDeck';
@@ -8,7 +9,14 @@ let socketGame;
 const NewGame = () => {
 
   const [player, setPlayer] = useState<Player>({ uid: '', username: '' });
-  const [game, setGame] = useState<Game>({ players: [], rounds: [], uid: '', readyPlayers: [], allPlayersReadyToGame: false });
+  const [game, setGame] = useState<Game>({
+    players: [],
+    rounds: [],
+    uid: '',
+    readyPlayers: [],
+    allPlayersReadyToGame: false,
+    currentHand: 0,
+  });
 
   useEffect(() => {
     socketInitializer();
@@ -50,6 +58,13 @@ const NewGame = () => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
   }, [game, player]);
 
+  const onEndTurn = () => {
+    socketGame.emit('game-end-turn');
+  }
+  const canIEndTorn = useMemo(() => {
+    return inGame && game.players[game.currentHand] && game.players[game.currentHand].uid === player.uid;
+  }, [inGame, game, player]);
+
   if (!inGame) {
     return (
       <>
@@ -68,7 +83,7 @@ const NewGame = () => {
     <div className='container m-auto'>
       { game.rounds.length
         ? <button onClick={ handleClickStartGame }>Restart Game</button>
-        : <button onClick={ handleClickStartGame } disabled={!game.allPlayersReadyToGame}>New Game</button> }
+        : <button onClick={ handleClickStartGame } disabled={ !game.allPlayersReadyToGame }>New Game</button> }
       <button onClick={ () => socketGame.emit('game-ready-to-play', player.uid) } disabled={ isReadyPlayer }>I'm Ready
       </button>
       { (game.rounds.length > 0 && game.rounds.length < 8)
@@ -78,6 +93,8 @@ const NewGame = () => {
         className='flex flex-grow via-amber-200'>Players: { game.players.reduce((p, c) => `${ p } ${ c.username }`, '') }
       </div>
       <h1>Round: { game.rounds.length }</h1>
+      <h1>Current turn: { game.players[game.currentHand].username }</h1>
+      <button onClick={ onEndTurn } disabled={ !canIEndTorn }>Change turn</button>
       <hr className='my-2'/>
       { game.rounds.length > 0 && inGame && (
         <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove }/>

@@ -23,6 +23,7 @@ type Game = {
     rounds: Array<Round>;
     readyPlayers: Array<string>;
     allPlayersReadyToGame: boolean;
+    currentHand: number;
 }
 
 type GamesList = Array<Game>

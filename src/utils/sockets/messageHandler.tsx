@@ -1,12 +1,13 @@
 import { getShuffledDeck } from '../useShuffledDeck';
 import { v4 as uuidv4 } from 'uuid';
 
-const initGame = {
+const initGame: Game = {
     players: [],
     rounds: [],
     uid: 'ggg',
     readyPlayers: [],
     allPlayersReadyToGame: false,
+    currentHand: 0,
 }
 
 const game: Game = { ...initGame };
@@ -94,6 +95,9 @@ export default (io, socket) => {
 
     socket.on('game-end-turn', () => {
         console.log('game-end-turn');
+        let newHand = (game.currentHand % game.players.length) + 1;
+        game.currentHand = newHand >= game.players.length ? 0 : newHand;
+        gameUpdate(game);
     })
 
     socket.on('game-has-word', () => {
