@@ -55,6 +55,11 @@ const NewGame = () => {
   const onEndTurn = () => {
     socketGame.emit('game-end-turn');
   }
+
+  const isRoundStarted = useMemo(() => {
+    return game.rounds.length > 0;
+  }, [game.rounds]);
+
   const isMyTurn = useMemo(() => {
     return inGame && game.players[game.currentHand] && game.players[game.currentHand].uid === player.uid;
   }, [inGame, game, player]);
@@ -64,24 +69,35 @@ const NewGame = () => {
   }, [game, player]);
 
   const canIEndTorn = useMemo(() => {
-    if (!isMyTurn) {
-      return false;
+    if (isRoundStarted && isMyTurn) {
+      return !(game.isLastCircle && iSaidWord);
     }
-    return !(game.isLastCircle && iSaidWord);
 
-  }, [isMyTurn, game, iSaidWord]);
+    return false;
+  }, [isRoundStarted, isMyTurn, game, iSaidWord]);
 
   const canISayWord = useMemo(() => {
-    return !game.playerHasWord && isMyTurn;
-  }, [inGame, game]);
+    if (isRoundStarted) {
+      return !game.playerHasWord && isMyTurn;
+    }
+
+    return false;
+  }, [isRoundStarted, inGame, game]);
 
   const onHasWord = () => {
     socketGame.emit('game-has-word', player.uid);
   }
 
+  const gameStarted = useMemo(() => game.rounds.length > 0, [game.rounds]);
+
   const canIStarNewRound = useMemo(() => {
+    if (!gameStarted) {
+      return game.allPlayersReadyToGame;
+    }
+
     return isMyTurn && game.isLastCircle && iSaidWord;
-  }, [isMyTurn, game.isLastCircle, iSaidWord]);
+  }, [isMyTurn, game, iSaidWord, gameStarted]);
+
 
   if (!inGame) {
     return (
@@ -104,9 +120,9 @@ const NewGame = () => {
         : <button onClick={ handleClickStartGame } disabled={ !game.allPlayersReadyToGame }>New Game</button> }
       <button onClick={ () => socketGame.emit('game-ready-to-play', player.uid) } disabled={ isReadyPlayer }>I'm Ready
       </button>
-      { (game.rounds.length > 0 && game.rounds.length < 8)
-        ? <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound }>Next Round</button>
-        : <button onClick={ handleClickNextRound } disabled={ !inGame }>Start Round</button> }
+      <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound }>
+        { gameStarted ? 'Next Round' : 'Start Round' }
+      </button>
       <div
         className='flex flex-grow via-amber-200'>Players: { game.players.reduce((p, c) => `${ p } ${ c.username }`, '') }
       </div>
@@ -115,9 +131,11 @@ const NewGame = () => {
       <button onClick={ onEndTurn } disabled={ !canIEndTorn }>End Turn</button>
       <button onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
       <hr className='my-2'/>
-      { game.rounds.length > 0 && inGame && (
-        <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove }/>
-      ) }
+      {
+        game.rounds.length > 0 && inGame && (
+          <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove }/>
+        )
+      }
     </div>
   )
 };
