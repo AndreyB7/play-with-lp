@@ -1,45 +1,35 @@
 import React, {FC, useEffect, useState} from 'react';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import LetterCard from "./LetterCard";
+import HandsList from "./HandsList";
 
 interface Props {
   player: Player;
   game: Game;
+  handleMove: (game: Game) => void;
 }
 
-const parts = ['desc', 'discard', 'playerHand'];
+interface iCards {
+  deck:Deck,
+  table:Deck,
+  playerHand:Deck,
+}
 
-const GameDeck: FC<Props> = ({game, player}) => {
+const GameDeck: FC<Props> = ({game, player, handleMove}) => {
 
-  const [currentRound, setCurrentRound] = useState(game.rounds[game.rounds.length - 1])
-
-  const getOpponentsHands = () => {
-    const playersUid = Object.keys(currentRound.hands);
-    const playersHands = Object.values(currentRound.hands);
-    const myIdx = playersUid.findIndex(uid => player.uid === uid);
-    delete playersHands[myIdx];
-    return playersHands;
-  }
-
-  const [cards, setCards] = useState({
-    desc: [currentRound.deck.pop()],
-    discard: [currentRound.deck.pop()],
-    playerHand: currentRound.hands[`${player.uid}`],
+  const [cards, setCards] = useState<iCards>({
+    deck: game.rounds[0].deck.slice(0, 5),
+    table: game.rounds[0].table.slice(0, 5),
+    playerHand: game.rounds[0].hands[`${player.uid}`],
   });
 
   useEffect(() => {
-    setCurrentRound(game.rounds[game.rounds.length - 1]);
-  }, [game])
-
-  useEffect(() => {
     setCards({
-      desc: [currentRound.deck.pop()],
-      discard: [currentRound.deck.pop()],
-      playerHand: currentRound.hands[`${player.uid}`]
+      deck: game.rounds[0].deck.slice(0, 5),
+      table: game.rounds[0].table.slice(0, 5),
+      playerHand: game.rounds[0].hands[`${player.uid}`]
     })
-  }, [currentRound])
-
-  const opponentHands = getOpponentsHands();
+  }, [game])
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -58,39 +48,63 @@ const GameDeck: FC<Props> = ({game, player}) => {
     else {
       const sourceList = Array.from(cards[source.droppableId]);
       const destinationList = Array.from(cards[destination.droppableId]);
-      const [removed] = sourceList.splice(source.index, 1);
-      destinationList.splice(destination.index, 0, removed);
+      let removed;
+      switch (source.droppableId) {
+        case 'table':
+        case 'deck':
+          removed = sourceList.pop();
+          break;
+        default:
+          removed = sourceList.splice(source.index, 1)[0];
+          break;
+      }
 
-      setCards({
+      switch (destination.droppableId) {
+        case 'table':
+        case 'deck':
+          destinationList.push(removed);
+          break;
+        default:
+          destinationList.splice(destination.index, 0, removed);
+          break;
+      }
+
+      const newCards = {
         ...cards,
         [source.droppableId]: sourceList,
         [destination.droppableId]: destinationList,
-      });
+      };
+
+      setCards(newCards);
+      updateGame(newCards);
     }
   };
 
+  const updateGame = (cards) => {
+    game.rounds[0] = {
+      deck: cards.deck,
+      table: cards.table,
+      hands: {[`${player.uid}`]: cards.playerHand}, // only myHand to avoid other hands sort override.
+    }
+    handleMove(game);
+  }
+
+  const opponentsHands = (): {[key:string]:Deck} => {
+    const hands = {...game.rounds[0].hands};
+    delete hands[`${player.uid}`];
+    return hands;
+  }
+
   return (
     <div>
-      {opponentHands.length && opponentHands.map((opponentHand,idx) => {
-        return (
-          <div className='opponentHand'>
-            <h3>Opponent {idx+1}</h3>
-            <div className='flex mb-4 border border-amber-300'>
-              {opponentHand.map((card) => (
-                <LetterCard key={card.id} isOpen={false} card={card}/>
-              ))}
-            </div>
-          </div>
-        )
-      })}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className='game-desc-wrap flex flex-wrap'>
-          {parts.map((part) => (
-            <div key={part} className={`${part === 'discard' ? 'w-1/3' : 'w-2/3'}`}>
+        <div className='game-wrap flex flex-wrap'>
+          {Object.keys(cards).map((part) => (
+            <div key={part} className={`relative ${part === 'playerHand' ? 'w-full' : 'w-1/4'}`}>
               <h3>{part}</h3>
               <Droppable droppableId={part} direction="horizontal">
                 {(provided, snapshot) => (
-                  <div ref={provided.innerRef} className='min-h-52 m-1 flex flex-wrap'
+                  <div ref={provided.innerRef} className='min-h-40 m-1 flex flex-wrap'
                        style={{display: 'flex', outline: snapshot.isDraggingOver ? '1px solid red' : '0'}}>
                     {cards[part].map((card, index) => (
                       <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -102,11 +116,12 @@ const GameDeck: FC<Props> = ({game, player}) => {
                             style={{
                               display: 'flex',
                               userSelect: 'none',
+                              marginRight: `${ part === 'deck' || part === 'table' ? '-110px' : '0'}`,
                               border: snapshot.isDragging ? '1px solid red' : '0',
                               ...provided.draggableProps.style,
                             }}
                           >
-                            <LetterCard key={card.id} isOpen={part !== 'desc'} card={card}/>
+                            <LetterCard key={card.id} isOpen={part !== 'deck'} card={card}/>
                           </div>
                         )}
                       </Draggable>
@@ -119,6 +134,11 @@ const GameDeck: FC<Props> = ({game, player}) => {
           ))}
         </div>
       </DragDropContext>
+      {opponentsHands && (
+          <HandsList
+        players={game.players.filter(x => x.uid === player.uid)}
+      hands={opponentsHands()}/>)
+      }
     </div>
   );
 };

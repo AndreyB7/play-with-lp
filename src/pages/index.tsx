@@ -3,13 +3,16 @@ import {v4 as uuidv4} from 'uuid';
 import Link from 'next/link';
 
 export default function Home() {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
-    setUsername(localStorage.getItem('username'));
+    const storageUsername = localStorage.getItem('username');
+    if (storageUsername) {
+      setUsername(storageUsername);
+    }
   }, []);
 
-  const [chosenUsername, setChosenUsername] = useState("");
+  const [chosenUsername, setChosenUsername] = useState('');
 
   return (
     <div className="flex items-center p-4 mx-auto min-h-screen justify-center flex-wrap">
@@ -29,7 +32,6 @@ export default function Home() {
             <button
               onClick={() => {
                 setChosenUsername(username);
-                localStorage.setItem('uid', uuidv4());
                 localStorage.setItem('username', username);
               }}
               className="bg-white rounded-md px-4 py-2 text-xl"

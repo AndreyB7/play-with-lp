@@ -40,10 +40,10 @@ button:disabled {
 }
 
 .card {
-    cursor:pointer;
     -webkit-user-select: none; /* Safari */
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none; /* Standard syntax */
+    z-index: 1;
 }
 
 @font-face {
@@ -57,20 +57,25 @@ button:disabled {
 }
 
 .card-center-letter {
-    font-size: 3.5rem;
+    font-size: 3rem;
+    line-height: 1;
     font-family: 'Celtasmigoria', serif;
+    text-align: center;
+    text-transform: uppercase;
+    transform: translateY(35%);
 }
 
 .card-center-letter--smaller {
-    font-size: 2.8rem;
+    font-size: 2.1rem;
 }
 
 .card-center-letter--smallest {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
 }
 
 .card-letter-font {
     font-family: Censcbk, serif;
+    z-index: 0;
 }
 
 .closed-card {
