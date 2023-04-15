@@ -21,6 +21,7 @@ type Game = {
     uid: string;
     players: Array<Player>;
     rounds: Array<Round>;
+    readyPlayers: Array<string>;
 }
 
 type GamesList = Array<Game>
