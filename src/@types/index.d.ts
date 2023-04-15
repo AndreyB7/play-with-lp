@@ -24,6 +24,8 @@ type Game = {
     readyPlayers: Array<string>;
     allPlayersReadyToGame: boolean;
     currentHand: number;
+    playerHasWord: uid|undefined;
+    isLastCircle: boolean;
 }
 
 type GamesList = Array<Game>
