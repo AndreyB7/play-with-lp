@@ -35,14 +35,14 @@ const DraggableBlock: FC<Props> = (
     return cards;
   }, [cards, limit]);
 
-  const isDraggable = (part: keyof iCards) => {
+  const isDragDisabled = (part: keyof iCards) => {
     let result = false;
     switch (part) {
       case 'deck':
-        result = !isMyTurn || gotCardFromDeck;
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
         break;
       case 'table':
-        result = !isMyTurn || gotCardFromTable;
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
         break;
       default:
         break;
@@ -52,15 +52,16 @@ const DraggableBlock: FC<Props> = (
   }
 
   return (
-    <div ref={ provided.innerRef } className='min-h-40 m-1 flex flex-wrap'
-         style={ { display: 'flex', outline: snapshot.isDraggingOver ? '1px solid red' : '0' } }>
+    <div ref={ provided.innerRef }
+         className={ `min-height-card m-1 flex flex-wrap ${ block }${ snapshot.isDraggingOver ? ' someOver' : '' }` }
+         style={ { display: 'flex', borderRadius: '3px', outline: snapshot.isDraggingOver ? '1px solid #fff' : '0' } }>
       {
         showCards.map((card, index) => (
           <Draggable
             key={ card.id }
             draggableId={ card.id }
             index={ index }
-            isDragDisabled={ isDraggable(block) }
+            isDragDisabled={ isDragDisabled(block) }
           >
             { (provided, snapshot) => (
               <div
@@ -70,12 +71,10 @@ const DraggableBlock: FC<Props> = (
                 style={ {
                   display: 'flex',
                   userSelect: 'none',
-                  marginRight: `${ block === 'deck' || block === 'table' ? '-110px' : '0' }`,
-                  border: snapshot.isDragging ? '1px solid red' : '0',
                   ...provided.draggableProps.style,
                 } }
               >
-                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card }/>
+                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ showCards.length }/>
               </div>
             ) }
           </Draggable>

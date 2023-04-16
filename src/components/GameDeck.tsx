@@ -16,6 +16,12 @@ export interface iCards {
   playerHand: Deck;
 }
 
+const partNames = {
+  deck: 'Deck',
+  table: 'Discard',
+  playerHand: 'My Hand',
+}
+
 const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
   const [cards, setCards] = useState<iCards>({
@@ -35,10 +41,13 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
   // todo this flags we should save to gameState
   const [gotCardFromDeck, setGotCardFromDeck] = useState<boolean>(false);
   const [gotCardFromTable, setGotCardFromTable] = useState<boolean>(false);
+  const [putCardToTable, setPutCardToTable] = useState<boolean>(false);
+
   useEffect(() => {
     setGotCardFromDeck(false);
     setGotCardFromTable(false);
-  }, [isMyTurn]);
+    setPutCardToTable(false);
+  }, [isMyTurn, game.rounds.length]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -93,6 +102,9 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       if (source.droppableId === 'table') {
         setGotCardFromTable(true);
       }
+      if (destination.droppableId === 'table') {
+        setPutCardToTable(true);
+      }
     }
   };
 
@@ -111,14 +123,14 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     return hands;
   }
 
-  const isDroppable = (part: keyof iCards) => {
+  const isDropDisabled = (part: keyof iCards) => {
     let result = false;
     switch (part) {
       case 'deck':
         result = true;
         break;
       case 'table':
-        result = !isMyTurn;
+        result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
         break;
       default:
         break;
@@ -132,9 +144,9 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       <DragDropContext onDragEnd={ handleDragEnd }>
         <div className='game-wrap flex flex-wrap'>
           { Object.keys(cards).map((part: keyof iCards) => (
-            <div key={ part } className={ `relative ${ part === 'playerHand' ? 'w-full' : 'w-1/4' }` }>
-              <h3>{ part }</h3>
-              <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDroppable(part) }>
+            <div key={ part } className={ `relative ${ part } ${ part === 'playerHand' ? 'w-full' : 'w-1/6' }` }>
+              <h3 className='deck-part-title'>{ partNames[part] }</h3>
+              <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
                 {
                   (provided, snapshot) => (
                     <DraggableBlock
@@ -158,8 +170,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         <HandsList
           players={ game.players.filter(x => x.uid !== player.uid) }
           hands={ opponentsHands() }
-          // isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
-          isOpen={ true }
+          isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
         />)
       }
     </div>

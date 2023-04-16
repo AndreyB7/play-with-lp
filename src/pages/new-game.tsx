@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import useCurrentPlayer from '../utils/useCurrentPlayer';
 import GameBoard from '../components/GameBoard';
 import withPrivateRoute from '../components/withPrivateRoute';
+import { useRouter } from "next/router";
 
 let socketGame;
 
@@ -13,6 +14,8 @@ const NewGame = () => {
 
   const [game, setGame] = useState<Game | null>(null);
   const [connection, setConnection] = useState<boolean>(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     socketInitializer()
@@ -41,6 +44,10 @@ const NewGame = () => {
       setGame(game);
     });
 
+    socketGame.on('game-reset', () => {
+      router.push('/');
+    });
+
     return socketGame;
   };
 
@@ -50,7 +57,10 @@ const NewGame = () => {
     )
   }
 
-  return <GameBoard socketGame={ socketGame } game={ game } player={ player }/>
+  return (
+    <div className='container flex my-2 m-auto'>
+      <GameBoard socketGame={ socketGame } game={ game } player={ player }/>
+    </div>)
 };
 
 export default withPrivateRoute(NewGame);
