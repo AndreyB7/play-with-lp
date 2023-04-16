@@ -1,21 +1,24 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import useCurrentPlayer from '../utils/useCurrentPlayer';
 
 const withPrivateRoute = (Component) => {
-    return () => {
-        const router = useRouter();
+  return () => {
+    const router = useRouter();
 
-        useEffect(() => {
-            if (typeof window != 'undefined') {
-                const username = localStorage.getItem('username');
-                if (username === null) {
-                    router.push('/');
-                }
-            }
-        }, []);
+    const { getPlayer } = useCurrentPlayer();
 
-        return <Component />;
-    };
+    useEffect(() => {
+      if (typeof window != 'undefined') {
+        const player = getPlayer();
+        if (!player.username) {
+          router.push('/');
+        }
+      }
+    }, []);
+
+    return <Component/>;
+  };
 }
 
 export default withPrivateRoute

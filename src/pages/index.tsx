@@ -1,9 +1,11 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from "react";
+import useCurrentPlayer from '../utils/useCurrentPlayer';
 
 export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState('');
+  const { updatePlayer } = useCurrentPlayer();
 
   useEffect(() => {
     const storageUsername = localStorage.getItem('username');
@@ -14,6 +16,7 @@ export default function Home() {
 
   const handleClick = () => {
     localStorage.setItem('username', username);
+    updatePlayer('username', username);
     router.push('/new-game');
   }
 
