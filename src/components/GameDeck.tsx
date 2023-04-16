@@ -24,7 +24,7 @@ const partNames = {
 
 const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
-  const [ cards, setCards ] = useState<iCards>({
+  const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
     playerHand: game.rounds[0].hands[`${ player.uid }`],
@@ -36,18 +36,18 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       table: game.rounds[0].table,
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
-  }, [ game ])
+  }, [game])
 
   // todo this flags we should save to gameState
-  const [ gotCardFromDeck, setGotCardFromDeck ] = useState<boolean>(false);
-  const [ gotCardFromTable, setGotCardFromTable ] = useState<boolean>(false);
-  const [ putCardToTable, setPutCardToTable ] = useState<boolean>(false);
+  const [gotCardFromDeck, setGotCardFromDeck] = useState<boolean>(false);
+  const [gotCardFromTable, setGotCardFromTable] = useState<boolean>(false);
+  const [putCardToTable, setPutCardToTable] = useState<boolean>(false);
 
   useEffect(() => {
     setGotCardFromDeck(false);
     setGotCardFromTable(false);
     setPutCardToTable(false);
-  }, [ isMyTurn, game.rounds.length ]);
+  }, [isMyTurn, game.rounds.length]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -57,7 +57,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     // Moving within the same list
     if (source.droppableId === destination.droppableId) {
       const newList = Array.from(cards[source.droppableId]);
-      const [ removed ] = newList.splice(source.index, 1);
+      const [removed] = newList.splice(source.index, 1);
       newList.splice(destination.index, 0, removed);
 
       setCards({ ...cards, [source.droppableId]: newList });
@@ -144,7 +144,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       <DragDropContext onDragEnd={ handleDragEnd }>
         <div className='game-wrap flex flex-wrap'>
           { Object.keys(cards).map((part: keyof iCards) => (
-            <div key={ part } className={ `relative ${part} ${ part === 'playerHand' ? 'w-full' : 'w-1/6' }` }>
+            <div key={ part } className={ `relative ${ part } ${ part === 'playerHand' ? 'w-full' : 'w-1/6' }` }>
               <h3 className='deck-part-title'>{ partNames[part] }</h3>
               <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
                 {

@@ -4,7 +4,7 @@ import useCurrentPlayer from '../utils/useCurrentPlayer';
 
 export default function Home() {
   const router = useRouter();
-  const [ username, setUsername ] = useState('');
+  const [username, setUsername] = useState('');
   const { updatePlayer } = useCurrentPlayer();
 
   useEffect(() => {

@@ -33,19 +33,19 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   const isReadyPlayer = useMemo(() => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
-  }, [ game, player ]);
+  }, [game, player]);
 
   const isRoundStarted = useMemo(() => {
     return game.rounds.length > 0;
-  }, [ game.rounds ]);
+  }, [game.rounds]);
 
   const isMyTurn = useMemo(() => {
     return game.currentHand && game.currentHand.uid === player.uid;
-  }, [ game, player ]);
+  }, [game, player]);
 
   const iSaidWord = useMemo(() => {
     return game.playerHasWord === player.uid;
-  }, [ game, player ]);
+  }, [game, player]);
 
   const canIEndTorn = useMemo(() => {
     if (isRoundStarted && isMyTurn) {
@@ -53,7 +53,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     }
 
     return false;
-  }, [ isRoundStarted, isMyTurn, game, iSaidWord ]);
+  }, [isRoundStarted, isMyTurn, game, iSaidWord]);
 
   const canISayWord = useMemo(() => {
     if (isRoundStarted) {
@@ -61,9 +61,9 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     }
 
     return false;
-  }, [ isRoundStarted, game ]);
+  }, [isRoundStarted, game]);
 
-  const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [ game ]);
+  const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [game]);
 
   const canIStarNewRound = useMemo(() => {
     switch (game.gameStatus) {
@@ -77,14 +77,14 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
       default:
         return false;
     }
-  }, [ isMyTurn, game, iSaidWord ]);
+  }, [isMyTurn, game, iSaidWord]);
 
   useEffect(() => {
     if (game.gameStatus === 'finished') {
       // todo here we can process end game
       // window.alert('End game!');
     }
-  }, [ game ]);
+  }, [game]);
 
   return (
     <>

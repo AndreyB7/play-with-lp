@@ -23,7 +23,7 @@ li svg {
 }
 
 .table.someOver > * {
-    transform: translate(0,0)!important;
+    transform: translate(0, 0) !important;
 }
 
 .deck .min-height-card > *,

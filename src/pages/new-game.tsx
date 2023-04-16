@@ -12,8 +12,8 @@ const NewGame = () => {
   const { getPlayer, setPlayer } = useCurrentPlayer();
   const player = getPlayer();
 
-  const [ game, setGame ] = useState<Game | null>(null);
-  const [ connection, setConnection ] = useState<boolean>(true);
+  const [game, setGame] = useState<Game | null>(null);
+  const [connection, setConnection] = useState<boolean>(true);
 
   const router = useRouter();
 

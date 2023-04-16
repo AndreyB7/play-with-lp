@@ -33,7 +33,7 @@ const DraggableBlock: FC<Props> = (
     }
 
     return cards;
-  }, [ cards, limit ]);
+  }, [cards, limit]);
 
   const isDragDisabled = (part: keyof iCards) => {
     let result = false;
@@ -52,7 +52,8 @@ const DraggableBlock: FC<Props> = (
   }
 
   return (
-    <div ref={ provided.innerRef } className={`min-height-card m-1 flex flex-wrap ${block}${snapshot.isDraggingOver ? ' someOver' : ''}`}
+    <div ref={ provided.innerRef }
+         className={ `min-height-card m-1 flex flex-wrap ${ block }${ snapshot.isDraggingOver ? ' someOver' : '' }` }
          style={ { display: 'flex', borderRadius: '3px', outline: snapshot.isDraggingOver ? '1px solid #fff' : '0' } }>
       {
         showCards.map((card, index) => (
@@ -73,9 +74,9 @@ const DraggableBlock: FC<Props> = (
                   ...provided.draggableProps.style,
                 } }
               >
-                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={showCards.length}/>
+                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ showCards.length }/>
               </div>
-            )}
+            ) }
           </Draggable>
         ))
       }
