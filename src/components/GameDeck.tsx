@@ -7,15 +7,16 @@ interface Props {
   player: Player;
   game: Game;
   handleMove: (game: Game) => void;
+  isMyTurn: boolean;
 }
 
 export interface iCards {
-  deck: Deck,
-  table: Deck,
-  playerHand: Deck,
+  deck: Deck;
+  table: Deck;
+  playerHand: Deck;
 }
 
-const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
+const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
@@ -30,6 +31,14 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
+
+  // todo this flags we should save to gameState
+  const [gotCardFromDeck, setGotCardFromDeck] = useState<boolean>(false);
+  const [gotCardFromTable, setGotCardFromTable] = useState<boolean>(false);
+  useEffect(() => {
+    setGotCardFromDeck(false);
+    setGotCardFromTable(false);
+  }, [isMyTurn]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -77,6 +86,13 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
 
       setCards(newCards);
       updateGame(newCards);
+
+      if (source.droppableId === 'deck') {
+        setGotCardFromDeck(true);
+      }
+      if (source.droppableId === 'table') {
+        setGotCardFromTable(true);
+      }
     }
   };
 
@@ -95,6 +111,22 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
     return hands;
   }
 
+  const isDroppable = (part: keyof iCards) => {
+    let result = false;
+    switch (part) {
+      case 'deck':
+        result = true;
+        break;
+      case 'table':
+        result = !isMyTurn;
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }
+
   return (
     <div>
       <DragDropContext onDragEnd={ handleDragEnd }>
@@ -102,7 +134,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
           { Object.keys(cards).map((part: keyof iCards) => (
             <div key={ part } className={ `relative ${ part === 'playerHand' ? 'w-full' : 'w-1/4' }` }>
               <h3>{ part }</h3>
-              <Droppable droppableId={ part } direction="horizontal">
+              <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDroppable(part) }>
                 {
                   (provided, snapshot) => (
                     <DraggableBlock
@@ -111,6 +143,9 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
                       limit={ part === 'deck' ? 5 : part === 'table' ? 3 : undefined }
                       provided={ provided }
                       snapshot={ snapshot }
+                      isMyTurn={ isMyTurn }
+                      gotCardFromDeck={ gotCardFromDeck }
+                      gotCardFromTable={ gotCardFromTable }
                     />
                   )
                 }
@@ -123,7 +158,8 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
         <HandsList
           players={ game.players.filter(x => x.uid !== player.uid) }
           hands={ opponentsHands() }
-          isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
+          // isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
+          isOpen={ true }
         />)
       }
     </div>

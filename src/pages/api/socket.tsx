@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import { getShuffledDeck } from '../../utils/useShuffledDeck';
 import { v4 as uuidv4 } from 'uuid';
+import { getShuffledDeck } from '../../utils/useShuffledDeck';
 
 export const initGame: Game = {
   players: [],
@@ -8,7 +8,7 @@ export const initGame: Game = {
   uid: uuidv4,
   readyPlayers: [],
   allPlayersReadyToGame: false,
-  currentHand: 0,
+  currentHand: undefined,
   playerHasWord: undefined,
   isLastCircle: false,
   gameStatus: 'notStarted',
@@ -61,10 +61,12 @@ export default function SocketHandler(req, res) {
       if (currentGame.rounds[0].deck.length === 0) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
-      let newHand = (currentGame.currentHand % currentGame.players.length) + 1;
-      currentGame.currentHand = newHand >= currentGame.players.length ? 0 : newHand;
 
-      if (currentGame.playerHasWord === currentGame.players[currentGame.currentHand].uid) {
+      const currentIdx = 0;
+      let newHand = (currentIdx % currentGame.players.length) + 1;
+      currentGame.currentHand = currentGame.players[newHand >= currentGame.players.length ? 0 : newHand];
+
+      if (currentGame.playerHasWord === currentGame.currentHand.uid) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
@@ -135,18 +137,22 @@ export default function SocketHandler(req, res) {
       currentGame.playerHasWord = undefined;
       currentGame.gameStatus = 'notStarted';
       currentGame.isLastCircle = false;
-      currentGame.currentHand = 0;
+      currentGame.currentHand = currentGame.players[0];
       gameUpdate(currentGame);
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
     socket.on('game-move', (newGame: Game) => {
-      currentGame.rounds[0].deck = newGame.rounds[0].deck;
-      currentGame.rounds[0].table = newGame.rounds[0].table;
-      currentGame.rounds[0].hands = {
-        ...currentGame.rounds[0].hands,
-        ...newGame.rounds[0].hands,
-      }
+      const myUID = globalPlayersList.find(x => x.id === socket.id).uid;
+
+      currentGame.rounds[0] = {
+        deck: newGame.rounds[0].deck,
+        table: newGame.rounds[0].table,
+        hands: {
+          ...currentGame.rounds[0].hands,
+          [`${ myUID }`]: newGame.rounds[0].hands[`${ myUID }`]
+        }
+      };
       gameUpdate(currentGame);
     })
 

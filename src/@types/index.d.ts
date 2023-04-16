@@ -23,7 +23,7 @@ type Game = {
   rounds: Array<Round>;
   readyPlayers: Array<string>;
   allPlayersReadyToGame: boolean;
-  currentHand: number;
+  currentHand: Player | undefined;
   playerHasWord: uid | undefined;
   isLastCircle: boolean;
   gameStatus: 'notStarted' | 'started' | 'endRound' | 'lastRound' | 'finished';

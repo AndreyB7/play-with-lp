@@ -10,6 +10,9 @@ interface Props {
   limit?: number;
   provided: any;
   snapshot: any;
+  isMyTurn: boolean;
+  gotCardFromDeck: boolean;
+  gotCardFromTable: boolean;
 }
 
 const DraggableBlock: FC<Props> = (
@@ -18,7 +21,10 @@ const DraggableBlock: FC<Props> = (
     block,
     limit = undefined,
     provided,
-    snapshot
+    snapshot,
+    isMyTurn,
+    gotCardFromDeck,
+    gotCardFromTable
   }
 ) => {
   const showCards = useMemo(() => {
@@ -29,12 +35,33 @@ const DraggableBlock: FC<Props> = (
     return cards;
   }, [cards, limit]);
 
+  const isDraggable = (part: keyof iCards) => {
+    let result = false;
+    switch (part) {
+      case 'deck':
+        result = !isMyTurn || gotCardFromDeck;
+        break;
+      case 'table':
+        result = !isMyTurn || gotCardFromTable;
+        break;
+      default:
+        break;
+    }
+    console.log(part, result);
+    return result;
+  }
+
   return (
     <div ref={ provided.innerRef } className='min-h-40 m-1 flex flex-wrap'
          style={ { display: 'flex', outline: snapshot.isDraggingOver ? '1px solid red' : '0' } }>
       {
         showCards.map((card, index) => (
-          <Draggable key={ card.id } draggableId={ card.id } index={ index }>
+          <Draggable
+            key={ card.id }
+            draggableId={ card.id }
+            index={ index }
+            isDragDisabled={ isDraggable(block) }
+          >
             { (provided, snapshot) => (
               <div
                 ref={ provided.innerRef }

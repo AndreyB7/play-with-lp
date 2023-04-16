@@ -38,7 +38,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   }, [game.rounds]);
 
   const isMyTurn = useMemo(() => {
-    return game.players[game.currentHand] && game.players[game.currentHand].uid === player.uid;
+    return game.currentHand && game.currentHand.uid === player.uid;
   }, [game, player]);
 
   const iSaidWord = useMemo(() => {
@@ -103,7 +103,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
       <hr className='my-2'/>
       {
         game.rounds.length > 0 && (
-          <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove }/>
+          <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove } isMyTurn={ isMyTurn }/>
         )
       }
     </div>

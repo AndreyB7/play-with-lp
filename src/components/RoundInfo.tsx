@@ -7,7 +7,7 @@ interface Props {
 const RoundInfo: FC<Props> = ({ game }) => {
 console.log(game.gameStatus);
   const currentRoundNumber: number = useMemo(() => game.rounds.length, [game]);
-  const currentHand: string = useMemo(() => game.players[game.currentHand].username, [game]);
+  const currentHand: string = useMemo(() => game.currentHand?.username ?? '', [game]);
   return (
     <div>
       <h1>Round: { currentRoundNumber }</h1>
