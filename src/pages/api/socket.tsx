@@ -62,10 +62,9 @@ export default function SocketHandler(req, res) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
 
-      const currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand.uid);
-
-      let newHand = (currentIdx % currentGame.players.length);
-      currentGame.currentHand = currentGame.players[newHand];
+      const currentIdx = 0;
+      let newHand = (currentIdx % currentGame.players.length) + 1;
+      currentGame.currentHand = currentGame.players[newHand >= currentGame.players.length ? 0 : newHand];
 
       if (currentGame.playerHasWord === currentGame.currentHand.uid) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
@@ -123,9 +122,6 @@ export default function SocketHandler(req, res) {
         currentGame.players.forEach(player => newRound.hands[`${ player.uid }`].push(newRound.deck.pop()));
       }
       newRound.table.push(newRound.deck.pop());
-      if (currentGame.rounds.length === 0) {
-        currentGame.currentHand = currentGame.players[0];
-      }
       currentGame.rounds.unshift(newRound); // new round first
       currentGame.playerHasWord = undefined;
       currentGame.isLastCircle = false;
@@ -143,19 +139,6 @@ export default function SocketHandler(req, res) {
       currentGame.isLastCircle = false;
       currentGame.currentHand = currentGame.players[0];
       gameUpdate(currentGame);
-    })
-
-    socket.on('game-reset', () => {
-      currentGame.players = [];
-      currentGame.rounds = [];
-      currentGame.readyPlayers = [];
-      currentGame.allPlayersReadyToGame = false;
-      currentGame.playerHasWord = undefined;
-      currentGame.gameStatus = 'notStarted';
-      currentGame.isLastCircle = false;
-      currentGame.currentHand = undefined;
-      socket.emit('game-reset');
-      socket.broadcast.emit('game-reset');
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
