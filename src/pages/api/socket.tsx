@@ -14,7 +14,7 @@ export const initGame: Game = {
   gameStatus: 'notStarted',
 }
 
-const limitRoundsCount = parseInt(process.env.LIMIT_ROUND_COUNT, 10) || 1;
+const limitRoundsCount = parseInt(process.env.LIMIT_ROUND_COUNT, 10) || 8;
 const limitPlayersCount = parseInt(process.env.LIMIT_PLAYERS_COUNT, 10) || 8;
 
 const currentGame: Game = { ...initGame };
