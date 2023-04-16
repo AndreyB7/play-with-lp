@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import { Socket } from 'socket.io';
 import RoundInfo from '../components/RoundInfo';
 import GameDeck from '../components/GameDeck';
@@ -61,15 +61,27 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return false;
   }, [isRoundStarted, game]);
 
-  const gameStarted = useMemo(() => game.gameStatus === 'started', [game]);
+  const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [game]);
 
   const canIStarNewRound = useMemo(() => {
-    if (gameStarted) {
-      return isMyTurn && game.isLastCircle && iSaidWord;
+    switch (game.gameStatus) {
+      case 'notStarted':
+        return game.allPlayersReadyToGame;
+      case 'started':
+        return isMyTurn && game.isLastCircle && iSaidWord;
+      case 'finished':
+      case 'lastRound':
+      default:
+        return false;
     }
+  }, [isMyTurn, game, iSaidWord]);
 
-    return game.allPlayersReadyToGame;
-  }, [isMyTurn, game, iSaidWord, gameStarted]);
+  useEffect(() => {
+    if (game.gameStatus === 'finished') {
+      // todo here we can process end game
+      window.alert('End game!');
+    }
+  }, [game]);
 
   return (
     <div className='container m-auto'>
