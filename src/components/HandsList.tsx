@@ -13,10 +13,10 @@ const HandsList: FC<Props> = ({hands, players, isOpen = false}) => (
       const cards = hands[opponentUid];
       return (
         <div key={opponentUid} className='opponentHand'>
-          <h3>{players.find(x => x.uid === opponentUid).username}</h3>
+          <h3 className='deck-part-title'>{players.find(x => x.uid === opponentUid).username}</h3>
           <div className='min-h-40 m-1 flex flex-wrap'>
             {cards.map((card) => (
-              <LetterCard key={card.id} isOpen={isOpen} card={card}/>
+              <LetterCard key={card.id} isOpen={isOpen} card={card} cardCount={cards.length}/>
             ))}
           </div>
         </div>

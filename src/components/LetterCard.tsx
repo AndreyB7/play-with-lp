@@ -3,16 +3,17 @@ import React, {FC} from "react";
 interface Props {
     card: Card,
     isOpen: boolean,
+    cardCount: number,
 }
 
-const LetterCard: FC<Props> = ({ card, isOpen }) => {
+const LetterCard: FC<Props> = ({ card, isOpen, cardCount }) => {
     const largeLetters = ['z', 'w', 't', 'm'];
     const classes = {
         smaller: `${card.label.length === 2 ? ' card-center-letter--smaller' : ''}`,
         smallest: `${largeLetters.includes(card.label) ? ' card-center-letter--smallest' : ''}`,
     }
     return (
-        <div className={`card flex flex-col justify-between h-36 w-28 bg-white rounded-sm text-black shadow-xl m-0.5 ${
+        <div style={{marginRight: `-${cardCount > 8 ? 20 : 0}px`}} className={`card flex flex-col justify-between h-36 w-28 bg-white rounded text-black shadow shadow-black m-0.5 ${
             isOpen ? 'open' : 'close'}`}>
             {isOpen ? (<>
             <div className="flex flex-col uppercase card-letter-font px-1.5">

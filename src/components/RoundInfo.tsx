@@ -1,17 +1,18 @@
-import React, { FC, memo, useMemo } from 'react';
+import React, {FC, memo, useMemo} from 'react';
 
 interface Props {
   game: Game;
 }
 
-const RoundInfo: FC<Props> = ({ game }) => {
-console.log(game.gameStatus);
+const RoundInfo: FC<Props> = ({game}) => {
   const currentRoundNumber: number = useMemo(() => game.rounds.length, [game]);
   const currentHand: string = useMemo(() => game.currentHand?.username ?? '', [game]);
   return (
-    <div>
-      <h1>Round: { currentRoundNumber }</h1>
-      <h1>Current turn: { currentHand }</h1>
+    <div className='mb-2'>
+      <div>Game: {game.gameStatus}</div>
+      {game.playerHasWord && <div>{game.players.find(x=>x.uid === game.playerHasWord).username} - Has Word!</div> }
+      <div>Round: {currentRoundNumber}</div>
+      <div>Current turn: {currentHand}</div>
     </div>
   );
 };

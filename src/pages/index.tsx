@@ -4,7 +4,7 @@ import useCurrentPlayer from '../utils/useCurrentPlayer';
 
 export default function Home() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [ username, setUsername ] = useState('');
   const { updatePlayer } = useCurrentPlayer();
 
   useEffect(() => {
@@ -23,7 +23,6 @@ export default function Home() {
   return (
     <div className="flex items-center p-4 mx-auto min-h-screen justify-center flex-wrap">
       <main className="gap-4 flex flex-col items-center justify-center w-full h-full">
-
         <h3 className="font-bold text-white text-xl">
           How people should call you?
         </h3>
