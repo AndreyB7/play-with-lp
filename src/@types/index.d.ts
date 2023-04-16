@@ -26,7 +26,7 @@ type Game = {
   currentHand: number;
   playerHasWord: uid | undefined;
   isLastCircle: boolean;
-  gameStatus: 'notStarted' | 'started' | 'lastRound' | 'finished';
+  gameStatus: 'notStarted' | 'started' | 'endRound' | 'lastRound' | 'finished';
 }
 
 type GamesList = Array<Game>

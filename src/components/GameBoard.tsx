@@ -68,6 +68,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
       case 'notStarted':
         return game.allPlayersReadyToGame;
       case 'started':
+      case 'endRound':
         return isMyTurn && game.isLastCircle && iSaidWord;
       case 'finished':
       case 'lastRound':

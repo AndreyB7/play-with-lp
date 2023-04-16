@@ -123,7 +123,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove }) => {
         <HandsList
           players={ game.players.filter(x => x.uid !== player.uid) }
           hands={ opponentsHands() }
-          isOpen={ true }
+          isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
         />)
       }
     </div>

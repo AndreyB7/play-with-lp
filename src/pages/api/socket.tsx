@@ -64,10 +64,8 @@ export default function SocketHandler(req, res) {
       let newHand = (currentGame.currentHand % currentGame.players.length) + 1;
       currentGame.currentHand = newHand >= currentGame.players.length ? 0 : newHand;
 
-      if (currentGame.gameStatus === 'lastRound') {
-        if (currentGame.playerHasWord === currentGame.players[currentGame.currentHand].uid) {
-          currentGame.gameStatus = 'finished';
-        }
+      if (currentGame.playerHasWord === currentGame.players[currentGame.currentHand].uid) {
+        currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
       gameUpdate(currentGame);
