@@ -1,124 +1,178 @@
-import React, {FC, useEffect, useState} from 'react';
-import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
-import LetterCard from "./LetterCard";
+import React, { FC, useEffect, useState } from 'react';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import DraggableBlock from '../components/DraggableBlock';
+import HandsList from "./HandsList";
 
 interface Props {
   player: Player;
   game: Game;
+  handleMove: (game: Game) => void;
+  isMyTurn: boolean;
 }
 
-const parts = ['desc', 'discard', 'playerHand'];
+export interface iCards {
+  deck: Deck;
+  table: Deck;
+  playerHand: Deck;
+}
 
-const GameDeck: FC<Props> = ({game, player}) => {
+const partNames = {
+  deck: 'Deck',
+  table: 'Discard',
+  playerHand: 'My Hand',
+}
 
-  const [currentRound, setCurrentRound] = useState(game.rounds[game.rounds.length - 1])
+const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
-  const getOpponentsHands = () => {
-    const playersUid = Object.keys(currentRound.hands);
-    const playersHands = Object.values(currentRound.hands);
-    const myIdx = playersUid.findIndex(uid => player.uid === uid);
-    delete playersHands[myIdx];
-    return playersHands;
-  }
-
-  const [cards, setCards] = useState({
-    desc: [currentRound.deck.pop()],
-    discard: [currentRound.deck.pop()],
-    playerHand: currentRound.hands[`${player.uid}`],
+  const [cards, setCards] = useState<iCards>({
+    deck: game.rounds[0].deck,
+    table: game.rounds[0].table,
+    playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
   useEffect(() => {
-    setCurrentRound(game.rounds[game.rounds.length - 1]);
+    setCards({
+      deck: game.rounds[0].deck,
+      table: game.rounds[0].table,
+      playerHand: game.rounds[0].hands[`${ player.uid }`]
+    })
   }, [game])
 
-  useEffect(() => {
-    setCards({
-      desc: [currentRound.deck.pop()],
-      discard: [currentRound.deck.pop()],
-      playerHand: currentRound.hands[`${player.uid}`]
-    })
-  }, [currentRound])
+  // todo this flags we should save to gameState
+  const [gotCardFromDeck, setGotCardFromDeck] = useState<boolean>(false);
+  const [gotCardFromTable, setGotCardFromTable] = useState<boolean>(false);
+  const [putCardToTable, setPutCardToTable] = useState<boolean>(false);
 
-  const opponentHands = getOpponentsHands();
+  useEffect(() => {
+    setGotCardFromDeck(false);
+    setGotCardFromTable(false);
+    setPutCardToTable(false);
+  }, [isMyTurn, game.rounds.length]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
       return;
     }
-    const {source, destination} = result;
+    const { source, destination } = result;
     // Moving within the same list
     if (source.droppableId === destination.droppableId) {
       const newList = Array.from(cards[source.droppableId]);
       const [removed] = newList.splice(source.index, 1);
       newList.splice(destination.index, 0, removed);
 
-      setCards({...cards, [source.droppableId]: newList});
+      setCards({ ...cards, [source.droppableId]: newList });
     }
     // Moving to a different list
     else {
       const sourceList = Array.from(cards[source.droppableId]);
       const destinationList = Array.from(cards[destination.droppableId]);
-      const [removed] = sourceList.splice(source.index, 1);
-      destinationList.splice(destination.index, 0, removed);
+      let removed;
+      switch (source.droppableId) {
+        case 'table':
+        case 'deck':
+          removed = sourceList.pop();
+          break;
+        default:
+          removed = sourceList.splice(source.index, 1)[0];
+          break;
+      }
 
-      setCards({
+      switch (destination.droppableId) {
+        case 'table':
+        case 'deck':
+          destinationList.push(removed);
+          break;
+        default:
+          destinationList.splice(destination.index, 0, removed);
+          break;
+      }
+
+      const newCards = {
         ...cards,
         [source.droppableId]: sourceList,
         [destination.droppableId]: destinationList,
-      });
+      };
+
+      setCards(newCards);
+      updateGame(newCards);
+
+      if (source.droppableId === 'deck') {
+        setGotCardFromDeck(true);
+      }
+      if (source.droppableId === 'table') {
+        setGotCardFromTable(true);
+      }
+      if (destination.droppableId === 'table') {
+        setPutCardToTable(true);
+      }
     }
   };
 
+  const updateGame = (cards) => {
+    game.rounds[0] = {
+      deck: cards.deck,
+      table: cards.table,
+      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override.
+    }
+    handleMove(game);
+  }
+
+  const opponentsHands = (): { [key: string]: Deck } => {
+    const hands = { ...game.rounds[0].hands };
+    delete hands[`${ player.uid }`];
+    return hands;
+  }
+
+  const isDropDisabled = (part: keyof iCards) => {
+    let result = false;
+    switch (part) {
+      case 'deck':
+        result = true;
+        break;
+      case 'table':
+        result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }
+
   return (
     <div>
-      {opponentHands.length && opponentHands.map((opponentHand,idx) => {
-        return (
-          <div className='opponentHand'>
-            <h3>Opponent {idx+1}</h3>
-            <div className='flex mb-4 border border-amber-300'>
-              {opponentHand.map((card) => (
-                <LetterCard key={card.id} isOpen={false} card={card}/>
-              ))}
-            </div>
-          </div>
-        )
-      })}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className='game-desc-wrap flex flex-wrap'>
-          {parts.map((part) => (
-            <div key={part} className={`${part === 'discard' ? 'w-1/3' : 'w-2/3'}`}>
-              <h3>{part}</h3>
-              <Droppable droppableId={part} direction="horizontal">
-                {(provided, snapshot) => (
-                  <div ref={provided.innerRef} className='min-h-52 m-1 flex flex-wrap'
-                       style={{display: 'flex', outline: snapshot.isDraggingOver ? '1px solid red' : '0'}}>
-                    {cards[part].map((card, index) => (
-                      <Draggable key={card.id} draggableId={card.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              display: 'flex',
-                              userSelect: 'none',
-                              border: snapshot.isDragging ? '1px solid red' : '0',
-                              ...provided.draggableProps.style,
-                            }}
-                          >
-                            <LetterCard key={card.id} isOpen={part !== 'desc'} card={card}/>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
+      <DragDropContext onDragEnd={ handleDragEnd }>
+        <div className='game-wrap flex flex-wrap'>
+          { Object.keys(cards).map((part: keyof iCards) => (
+            <div key={ part } className={ `relative ${ part } ${ part === 'playerHand' ? 'w-full' : 'w-1/6' }` }>
+              <h3 className='deck-part-title'>{ partNames[part] }</h3>
+              <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
+                {
+                  (provided, snapshot) => (
+                    <DraggableBlock
+                      block={ part }
+                      cards={ cards[part] }
+                      limit={ part === 'deck' ? 5 : part === 'table' ? 3 : undefined }
+                      provided={ provided }
+                      snapshot={ snapshot }
+                      isMyTurn={ isMyTurn }
+                      gotCardFromDeck={ gotCardFromDeck }
+                      gotCardFromTable={ gotCardFromTable }
+                    />
+                  )
+                }
               </Droppable>
             </div>
-          ))}
+          )) }
         </div>
       </DragDropContext>
+      { opponentsHands && (
+        <HandsList
+          players={ game.players.filter(x => x.uid !== player.uid) }
+          hands={ opponentsHands() }
+          isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
+        />)
+      }
     </div>
   );
 };
