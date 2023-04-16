@@ -1,18 +1,29 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import GameDeck from '../components/GameDeck';
+import useCurrentPlayer from '../utils/useCurrentPlayer';
+import GameBoard from '../components/GameBoard';
 import withPrivateRoute from '../components/withPrivateRoute';
+import { useRouter } from "next/router";
 
 let socketGame;
 
 const NewGame = () => {
 
-  const [player, setPlayer] = useState<Player>({uid: '', username: ''});
-  const [game, setGame] = useState<Game>({players: [], rounds: [], uid: ''});
+  const { getPlayer, setPlayer } = useCurrentPlayer();
+  const player = getPlayer();
+
+  const [game, setGame] = useState<Game | null>(null);
+  const [connection, setConnection] = useState<boolean>(true);
+
+  const router = useRouter();
 
   useEffect(() => {
-    socketInitializer();
-    setPlayer({uid: localStorage.getItem('uid'), username: localStorage.getItem('username')})
+    socketInitializer()
+      .then(socket => {
+        console.log('socket initialized');
+        socket.emit('game-join', player);
+      });
+
     return () => {
       socketGame.disconnect();
     };
@@ -21,56 +32,35 @@ const NewGame = () => {
   const socketInitializer = async () => {
     await fetch("/api/socket");
     socketGame = io();
+
+    socketGame.on('player-joined', data => {
+      console.log('player-joined', data);
+      setPlayer(data);
+    });
+
     socketGame.on('update-game', game => {
+      console.log('update-game', game);
+      setConnection(false);
       setGame(game);
-    })
-    socketGame.on('player-joined', player => {
-      setPlayer(player);
-      localStorage.setItem('uid', player.uid)
-    })
+    });
+
+    socketGame.on('game-reset', () => {
+      router.push('/');
+    });
+
     return socketGame;
   };
 
-  const inGame = useMemo(() => {
-    return game.players.find(x => x.uid === player.uid) != undefined;
-  }, [game, player]);
-
-  const handleClickJoinToGame = () => {
-    if (!inGame) {
-      socketGame.emit('game-join', player);
-    }
-  }
-
-  const handleClickStartGame = () => {
-    socketGame.emit('game-new', player);
-  }
-  const handleClickNextRound = () => {
-    socketGame.emit('game-next-round');
-  }
-
-  const handlePlayerMove = (game:Game) => {
-    socketGame.emit('game-move', game);
+  if (game === null || connection) {
+    return (
+      <div>Connection...</div>
+    )
   }
 
   return (
-    <div className='container m-auto'>
-      {game.rounds.length
-        ? <button onClick={handleClickStartGame}>Restart Game</button>
-        : <button onClick={handleClickStartGame}>New Game</button>}
-      <button onClick={handleClickJoinToGame} disabled={inGame}>I'm Ready</button>
-      {(game.rounds.length > 0 && game.rounds.length < 8)
-        ? <button onClick={handleClickNextRound} disabled={!inGame}>Next Round</button>
-        : <button onClick={handleClickNextRound} disabled={!inGame}>Start Round</button>}
-      <div
-        className='flex flex-grow via-amber-200'>Players: {game.players.reduce((p, c) => `${p} ${c.username}`, '')}
-      </div>
-      <h1>Round: {game.rounds.length}</h1>
-      <hr className='my-2'/>
-      {game.rounds.length > 0 && inGame && (
-        <GameDeck game={game} player={player} handleMove={handlePlayerMove}/>
-      )}
-    </div>
-  )
+    <div className='container flex my-2 m-auto'>
+      <GameBoard socketGame={ socketGame } game={ game } player={ player }/>
+    </div>)
 };
 
 export default withPrivateRoute(NewGame);

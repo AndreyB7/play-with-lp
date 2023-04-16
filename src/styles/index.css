@@ -5,7 +5,33 @@
 
 @import 'tailwindcss/utilities';
 
-/* Letter Card */
+li svg {
+    fill: currentColor;
+    display: inline;
+    width: .7rem;
+    height: .7rem;
+    margin-top: -0.25em;
+}
+
+.min-height-card {
+    min-height: 148px;
+    position: relative;
+}
+
+.min-height-card > * {
+    z-index: 0;
+}
+
+.table.someOver > * {
+    transform: translate(0, 0) !important;
+}
+
+.deck .min-height-card > *,
+.table .min-height-card > * {
+    position: absolute;
+    top: 0;
+}
+
 :root {
     font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
     font-size: 16px;
@@ -13,7 +39,7 @@
     font-weight: 400;
 
     background-color: #242424;
-    color:#fff;
+    color: #fff;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -83,4 +109,9 @@ button:disabled {
     height: 100%;
     background-position: center;
     background-size: 1rem;
+}
+
+.deck-part-title {
+    padding-left: 1rem;
+    font-weight: bold;
 }
