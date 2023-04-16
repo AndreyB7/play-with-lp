@@ -35,14 +35,14 @@ const DraggableBlock: FC<Props> = (
     return cards;
   }, [cards, limit]);
 
-  const isDragDisabled = (part: keyof iCards) => {
+  const isDraggable = (part: keyof iCards) => {
     let result = false;
     switch (part) {
       case 'deck':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || gotCardFromDeck;
         break;
       case 'table':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || gotCardFromTable;
         break;
       default:
         break;
@@ -52,16 +52,15 @@ const DraggableBlock: FC<Props> = (
   }
 
   return (
-    <div ref={ provided.innerRef }
-         className={ `min-height-card m-1 flex flex-wrap ${ block }${ snapshot.isDraggingOver ? ' someOver' : '' }` }
-         style={ { display: 'flex', borderRadius: '3px', outline: snapshot.isDraggingOver ? '1px solid #fff' : '0' } }>
+    <div ref={ provided.innerRef } className='min-h-40 m-1 flex flex-wrap'
+         style={ { display: 'flex', outline: snapshot.isDraggingOver ? '1px solid red' : '0' } }>
       {
         showCards.map((card, index) => (
           <Draggable
             key={ card.id }
             draggableId={ card.id }
             index={ index }
-            isDragDisabled={ isDragDisabled(block) }
+            isDragDisabled={ isDraggable(block) }
           >
             { (provided, snapshot) => (
               <div
@@ -71,10 +70,12 @@ const DraggableBlock: FC<Props> = (
                 style={ {
                   display: 'flex',
                   userSelect: 'none',
+                  marginRight: `${ block === 'deck' || block === 'table' ? '-110px' : '0' }`,
+                  border: snapshot.isDragging ? '1px solid red' : '0',
                   ...provided.draggableProps.style,
                 } }
               >
-                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ showCards.length }/>
+                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card }/>
               </div>
             ) }
           </Draggable>

@@ -7,10 +7,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>The Game</title>
-        <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
-        <link rel="shortcut icon" href="favicon.svg"/>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <link rel="shortcut icon" href="favicon.svg" />
       </Head>
-      <Component { ...pageProps } />
+      <Component {...pageProps} />
     </>
   )
 }
