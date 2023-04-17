@@ -47,7 +47,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     setGotCardFromDeck(false);
     setGotCardFromTable(false);
     setPutCardToTable(false);
-  }, [isMyTurn, game.rounds.length]);
+  }, [isMyTurn]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -133,6 +133,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
         break;
       default:
+        result = game.gameStatus !== 'started';
         break;
     }
 

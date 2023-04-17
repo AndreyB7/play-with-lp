@@ -29,6 +29,10 @@ li svg {
     transform: translate(0, 0) !important;
 }
 
+.playerHand-drag-wrap {
+    overflow: hidden;
+}
+
 .deck .min-height-card > *,
 .table .min-height-card > * {
     position: absolute;

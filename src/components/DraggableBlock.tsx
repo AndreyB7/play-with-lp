@@ -29,9 +29,8 @@ const DraggableBlock: FC<Props> = (
 ) => {
   const showCards = useMemo(() => {
     if (limit) {
-      return cards.slice(0, limit);
+      return cards.slice(-limit);
     }
-
     return cards;
   }, [cards, limit]);
 

@@ -62,7 +62,12 @@ export default function SocketHandler(req, res) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
 
-      const currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand.uid);
+      let currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand.uid);
+
+      // single player mode
+      if (currentGame.players.length === 1) {
+        currentIdx = 0;
+      }
 
       let newHand = (currentIdx % currentGame.players.length);
       currentGame.currentHand = currentGame.players[newHand];
