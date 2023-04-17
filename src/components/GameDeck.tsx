@@ -124,7 +124,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
   }
 
   const isDropDisabled = (part: keyof iCards) => {
-    let result = false;
+    let result;
     switch (part) {
       case 'deck':
         result = true;
