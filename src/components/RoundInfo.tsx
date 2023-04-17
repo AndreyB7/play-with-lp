@@ -9,7 +9,7 @@ const RoundInfo: FC<Props> = ({game}) => {
   const currentHand: string = useMemo(() => game.currentHand?.username ?? '', [game]);
   return (
     <div className='mb-2'>
-      <div>Game: {game.gameStatus}</div>
+      <div className='capitalize'>Game: {game.gameStatus}</div>
       {game.playerHasWord && <div>{game.players.find(x=>x.uid === game.playerHasWord).username} - Has Word!</div> }
       <div>Round: {currentRoundNumber}</div>
       <div>Current turn: {currentHand}</div>

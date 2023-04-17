@@ -58,7 +58,7 @@ const NewGame = () => {
   }
 
   return (
-    <div className='container flex my-2 m-auto'>
+    <div className='container md:flex md:flex-wrap my-2 m-auto'>
       <GameBoard socketGame={ socketGame } game={ game } player={ player }/>
     </div>)
 };
