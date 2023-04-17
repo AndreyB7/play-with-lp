@@ -30,12 +30,12 @@ export default function Home() {
           type="text"
           placeholder="Identity..."
           value={ username }
-          className="p-3 rounded-md outline-none"
+          className="p-3 border rounded-md outline-none"
           onChange={ (e) => setUsername(e.target.value) }
         />
         <button
           onClick={ handleClick }
-          className="bg-white rounded-md px-4 py-2 text-xl"
+          className="bg-white border rounded-md px-4 py-2 text-xl"
         >
           Go!
         </button>

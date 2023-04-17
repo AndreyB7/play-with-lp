@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { iCards } from '../components/GameDeck';
+import { iCards } from './GameDeck';
 import LetterCard from '../components/LetterCard';
 import { Draggable } from 'react-beautiful-dnd';
 
@@ -17,7 +17,7 @@ interface Props {
 
 const DraggableBlock: FC<Props> = (
   {
-    cards,
+    cards = [], // TODO empty-hand error fix, remove after in-round player join handle
     block,
     limit = undefined,
     provided,
@@ -53,8 +53,8 @@ const DraggableBlock: FC<Props> = (
 
   return (
     <div ref={ provided.innerRef }
-         className={ `min-height-card m-1 flex flex-wrap ${ block }${ snapshot.isDraggingOver ? ' someOver' : '' }` }
-         style={ { display: 'flex', borderRadius: '3px', outline: snapshot.isDraggingOver ? '1px solid #fff' : '0' } }>
+         className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${ snapshot.isDraggingOver ? ' someOver' : '' }` }
+         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : 'transparent' } }>
       {
         showCards.map((card, index) => (
           <Draggable
@@ -63,13 +63,13 @@ const DraggableBlock: FC<Props> = (
             index={ index }
             isDragDisabled={ isDragDisabled(block) }
           >
-            { (provided, snapshot) => (
+            { (provided) => (
               <div
                 ref={ provided.innerRef }
                 { ...provided.draggableProps }
                 { ...provided.dragHandleProps }
                 style={ {
-                  display: 'flex',
+                  display: 'inline-flex',
                   userSelect: 'none',
                   ...provided.draggableProps.style,
                 } }
