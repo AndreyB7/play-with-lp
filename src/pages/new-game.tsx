@@ -20,8 +20,7 @@ const NewGame = () => {
   useEffect(() => {
     socketInitializer()
       .then(socket => {
-        console.log('socket initialized');
-        socket.emit('game-join', player);
+        socket.emit('access', player);
       });
 
     return () => {
@@ -32,6 +31,20 @@ const NewGame = () => {
   const socketInitializer = async () => {
     await fetch("/api/socket");
     socketGame = io();
+
+    socketGame.on("unauthorized", (message) => {
+      localStorage.setItem('error', message);
+      router.push('/');
+    });
+
+    socketGame.on("authorized", () => {
+      delete player.password;
+      socketGame.emit('connect-player', player);
+    });
+
+    socketGame.on('connect-success', player => {
+      socketGame.emit('game-join', player);
+    });
 
     socketGame.on('player-joined', data => {
       console.log('player-joined', data);
@@ -48,6 +61,11 @@ const NewGame = () => {
       router.push('/');
     });
 
+    socketGame.on("disconnect", () => {
+      console.log("disconnected by socket");
+      router.push('/');
+    });
+
     return socketGame;
   };
 
@@ -58,7 +76,7 @@ const NewGame = () => {
   }
 
   return (
-    <div className='container md:flex md:flex-wrap my-2 m-auto'>
+    <div className='container md:flex md:flex-wrap py-2 m-auto min-h-screen'>
       <GameBoard socketGame={ socketGame } game={ game } player={ player }/>
     </div>)
 };

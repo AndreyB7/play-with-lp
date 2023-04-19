@@ -13,6 +13,10 @@ li svg {
     margin-top: -0.25em;
 }
 
+form input {
+    width: 100%;
+}
+
 .min-height-card {
     min-height: 150px;
     position: relative;
@@ -72,6 +76,11 @@ button {
     padding: 5px 15px;
     text-transform: uppercase;
     border-radius: 5px;
+    transition: opacity .2s ease;
+}
+
+button:hover {
+    opacity:.9;
 }
 
 button:disabled {

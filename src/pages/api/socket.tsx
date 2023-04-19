@@ -18,12 +18,11 @@ const limitRoundsCount = parseInt(process.env.LIMIT_ROUND_COUNT, 10) || 8;
 const limitPlayersCount = parseInt(process.env.LIMIT_PLAYERS_COUNT, 10) || 8;
 
 const currentGame: Game = { ...initGame };
-const globalPlayersList: Array<Player & { id: string }> = [];
+const globalPlayersList: Array<Player> = [];
 
 export default function SocketHandler(req, res) {
   // It means that socket server was already initialised
   if (res.socket.server.io) {
-    console.log("Already set up");
     res.end();
     return;
   }
@@ -32,24 +31,42 @@ export default function SocketHandler(req, res) {
   res.socket.server.io = io;
 
   const onConnection = (socket) => {
-    console.log('Connected new player (ID: %s)', socket.id);
-    const player = { id: socket.id, uid: '', username: 'Unknown' };
 
-    globalPlayersList.push(player);
-    socket.emit('connect-success', player);
+    socket.on('access', (player: Player) => {
+      const connectedPlayer = globalPlayersList.find(p => p.uid === player.uid);
+      if (connectedPlayer) {
+        // renew socket id for connected player with saved session id
+        connectedPlayer.uid = socket.id;
+        return socket.emit("authorized");
+      }
+      if (player.password === process.env.PASSWORD) {
+        return socket.emit("authorized");
+      }
+      console.log("Unauthorized: Disconnecting socket ", socket.id);
+      socket.emit("unauthorized", "Wrong Passkey");
+      return socket.disconnect();
+    })
+
+    socket.on('connect-player', (player: Player) => {
+      console.log('Connected new player (ID: %s)', socket.id);
+      delete player.password;
+      if (!globalPlayersList.some(p=>p.uid === socket.id)) {
+        player.uid = socket.id;
+        globalPlayersList.push(player);
+      }
+      socket.emit('connect-success', player);
+    })
 
     socket.on('disconnect', (reason) => {
       console.log('Disconnect (Reason: %s, ID: %s)', reason, socket.id);
 
-      const idx = globalPlayersList.findIndex(c => c.id === socket.id)
+      const idx = globalPlayersList.findIndex(p => p.uid === socket.id)
       if (idx > -1) {
         // Todo Here we can process disconnected player
         // currentGame.players = currentGame.players.filter(p => p.uid !== globalPlayersList[idx].uid);
         // gameUpdate(currentGame);
         // globalPlayersList.splice(idx, 1);
       }
-
-      console.log(globalPlayersList);
     })
 
     const gameUpdate = (newGameState: Game) => {
@@ -81,23 +98,20 @@ export default function SocketHandler(req, res) {
 
     socket.on('game-join', (data: Player) => {
       console.log('game-join', data);
-      let isNewPlayer = false;
       let player = currentGame.players.find(x => x.uid === data.uid);
+      let isNewPlayer = false;
       if (!player) {
         if (currentGame.players.length === limitPlayersCount) {
           // Todo process over limit players
+          // socket.disconnect();
           return;
         }
-        player = {
-          ...data,
-          uid: uuidv4()
-        }
+        player = data;
         isNewPlayer = true;
         socket.emit('player-joined', player);
       }
 
-      player.username = data.username; // in case we have updated username for same id
-      const idx = globalPlayersList.findIndex(x => x.id === socket.id);
+      const idx = globalPlayersList.findIndex(x => x.uid === socket.id);
       if (idx > -1) {
         globalPlayersList[idx] = { ...globalPlayersList[idx], ...player };
       }
@@ -125,7 +139,11 @@ export default function SocketHandler(req, res) {
 
       const countCardsToHand = currentGame.rounds.length + 3;
       for (let i = 0; i < countCardsToHand; i++) {
-        currentGame.players.forEach(player => newRound.hands[`${ player.uid }`].push(newRound.deck.pop()));
+        currentGame.players.forEach(player => {
+          if (currentGame.readyPlayers.includes(player.uid)) {
+            newRound.hands[`${ player.uid }`].push(newRound.deck.pop())
+          }
+        });
       }
       newRound.table.push(newRound.deck.pop());
       if (currentGame.rounds.length === 0) {
@@ -139,18 +157,8 @@ export default function SocketHandler(req, res) {
       gameUpdate(currentGame);
     })
 
-    socket.on('game-new', () => {
-      currentGame.rounds = [];
-      currentGame.readyPlayers = [];
-      currentGame.allPlayersReadyToGame = false;
-      currentGame.playerHasWord = undefined;
-      currentGame.gameStatus = 'notStarted';
-      currentGame.isLastCircle = false;
-      currentGame.currentHand = currentGame.players[0];
-      gameUpdate(currentGame);
-    })
-
     socket.on('game-reset', () => {
+      globalPlayersList.length = 0; // clear global players array
       currentGame.players = [];
       currentGame.rounds = [];
       currentGame.readyPlayers = [];
@@ -165,7 +173,7 @@ export default function SocketHandler(req, res) {
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
     socket.on('game-move', (newGame: Game) => {
-      const myUID = globalPlayersList.find(x => x.id === socket.id).uid;
+      const myUID = globalPlayersList.find(x => x.uid === socket.id).uid;
 
       currentGame.rounds[0] = {
         deck: newGame.rounds[0].deck,
@@ -196,12 +204,10 @@ export default function SocketHandler(req, res) {
     })
 
     socket.on('game-end-turn', () => {
-      console.log('game-end-turn');
       endTurn();
     })
 
     socket.on('game-has-word', (uid: string) => {
-      console.log('game-has-word');
       currentGame.playerHasWord = uid;
       currentGame.isLastCircle = true;
       endTurn();
