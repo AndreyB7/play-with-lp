@@ -116,8 +116,8 @@ button:disabled {
 
 .card-center-letter span {
     margin: auto;
-    line-height: 3;
-    padding-top: 10px;
+    line-height: 1;
+    padding-top: 33px;
 }
 
 .card-center-letter--smaller {
