@@ -22,7 +22,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-move', game);
   }
 
-  const onEndTurn = () => {
+  const onEndTurn = (e) => {
+    e.target.disabled = true; // prevent double click
     socketGame.emit('game-end-turn');
   }
   const onHasWord = () => {
