@@ -46,7 +46,6 @@ const DraggableBlock: FC<Props> = (
       default:
         break;
     }
-    console.log(part, result);
     return result;
   }
 

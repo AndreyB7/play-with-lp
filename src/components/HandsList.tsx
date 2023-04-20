@@ -8,7 +8,7 @@ interface Props {
 }
 
 const HandsList: FC<Props> = ({ hands, players, isOpen = false }) => (
-  <>
+  <div className='playerHands' style={{minHeight: 176 * Object.keys(hands).length}}>
     { Object.keys(hands).map((opponentUid) => {
       const cards = hands[opponentUid];
       return (
@@ -22,7 +22,7 @@ const HandsList: FC<Props> = ({ hands, players, isOpen = false }) => (
         </div>
       )
     }) }
-  </>
-);
+  </div>
+)
 
 export default HandsList;

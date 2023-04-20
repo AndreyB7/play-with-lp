@@ -36,6 +36,10 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
   }, [game, player]);
 
+  const isAllReady = () => {
+    return game.allPlayersReadyToGame;
+  }
+
   const isRoundStarted = useMemo(() => {
     return game.rounds.length > 0;
   }, [game.rounds]);
@@ -91,7 +95,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     <>
       <div className='md:w-5/6'>
         <div className='flex m-1.5 mb-2'>
-          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound }>
+          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
             { gameStarted ? 'Next Round' : 'Start Game' }
           </button>
           <button onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
@@ -114,11 +118,14 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
           game.players.map(p => (
             <li key={ p.uid }>{ game.readyPlayers.includes(p.uid)
               ? <CheckIcon style={ { color: 'lightgreen' } }/>
-              : <MinusIcon/> } { p.username }
+              : <MinusIcon style={ { color: 'hotpink' } }/> } { p.username }
             </li>))
         }</ul>
         <button onClick={ () => socketGame.emit('game-reset') }
                 className='mt-auto' disabled={ false }>Reset
+        </button>
+        <button onClick={ () => socketGame.emit('log-state') }
+                className='mt-auto mt-2' disabled={ false }>Log
         </button>
       </div>
     </>

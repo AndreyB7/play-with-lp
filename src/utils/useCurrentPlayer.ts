@@ -1,14 +1,16 @@
 type UseStoragePlayer = {
   getPlayer: () => Player;
   setPlayer: (data: Player) => Player;
-  updatePlayer: (field: 'username' | 'uid' | 'password', value: string) => Player;
+  updatePlayer: (field: 'username' | 'uid' | 'sessionId', value: string) => Player;
+  setError: (string) => void;
+  getError: () => string;
 }
 
 const useCurrentPlayer = (): UseStoragePlayer => {
   const isBrowser: boolean = ((): boolean => typeof window !== 'undefined')();
 
   const getPlayer = (): Player => {
-    let data: Player = { uid: '', username: '', password: '' };
+    let data: Player = { uid: '', username: ''};
 
     const rawData = isBrowser ? window['sessionStorage']['player'] : '';
     if (rawData) {
@@ -32,7 +34,17 @@ const useCurrentPlayer = (): UseStoragePlayer => {
     return setPlayer({ ...player, [`${ field }`]: value });
   }
 
-  return { getPlayer, setPlayer, updatePlayer };
+  const setError = (message) => {
+    if (isBrowser) {
+      window['sessionStorage'].setItem('error', message);
+    }
+  }
+
+  const getError = () => {
+    return isBrowser ? window['sessionStorage']['error'] : '';
+  }
+
+  return { getPlayer, setPlayer, updatePlayer, setError,  getError};
 }
 
 export default useCurrentPlayer;

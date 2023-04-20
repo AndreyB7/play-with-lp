@@ -13,10 +13,6 @@ li svg {
     margin-top: -0.25em;
 }
 
-form input {
-    width: 100%;
-}
-
 .min-height-card {
     min-height: 150px;
     position: relative;

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import DraggableBlock from '../components/DraggableBlock';
 import HandsList from "./HandsList";
@@ -61,6 +61,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       newList.splice(destination.index, 0, removed);
 
       setCards({ ...cards, [source.droppableId]: newList });
+      updateGame({ ...cards, [source.droppableId]: newList });
     }
     // Moving to a different list
     else {
@@ -118,7 +119,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
   }
 
   const opponentsHands = (): { [key: string]: Deck } => {
-    const hands = { ...game.rounds[0].hands };
+    const hands = {...game.rounds[0].hands};
     delete hands[`${ player.uid }`];
     return hands;
   }
@@ -139,6 +140,14 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
     return result;
   }
+
+  const handsList = useMemo(() => (
+    <HandsList
+      players={ game.players.filter(x => x.uid !== player.uid) }
+      hands={ opponentsHands() }
+      isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
+    />
+  ), [game.gameStatus, game.players])
 
   return (
     <div>
@@ -167,13 +176,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
           )) }
         </div>
       </DragDropContext>
-      { opponentsHands && (
-        <HandsList
-          players={ game.players.filter(x => x.uid !== player.uid) }
-          hands={ opponentsHands() }
-          isOpen={ game.gameStatus === 'endRound' || game.gameStatus === 'finished' }
-        />)
-      }
+      {handsList}
     </div>
   );
 };

@@ -9,7 +9,6 @@ type Deck = Array<Card>;
 type Player = {
   uid: string;
   username: string;
-  password: string;
 }
 
 type Round = {
