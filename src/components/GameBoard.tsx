@@ -13,9 +13,6 @@ interface Props {
 
 const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
-  const handleClickStartGame = () => {
-    socketGame.emit('game-new', player);
-  }
   const handleClickNextRound = () => {
     socketGame.emit('game-next-round');
   }
@@ -31,9 +28,17 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-has-word', player.uid);
   }
 
+  const readyToPlay = () => {
+    socketGame.emit('game-ready-to-play', player.uid)
+  }
+
   const isReadyPlayer = useMemo(() => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
   }, [game, player]);
+
+  const isAllReady = () => {
+    return game.allPlayersReadyToGame;
+  }
 
   const isRoundStarted = useMemo(() => {
     return game.rounds.length > 0;
@@ -47,7 +52,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return game.playerHasWord === player.uid;
   }, [game, player]);
 
-  const canIEndTorn = useMemo(() => {
+  const canIEndTurn = useMemo(() => {
     if (isRoundStarted && isMyTurn) {
       return !(game.isLastCircle && iSaidWord);
     }
@@ -81,7 +86,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   useEffect(() => {
     if (game.gameStatus === 'finished') {
-      // todo here we can process end game
+      // todo here we can process end game - we have gameEnd status displayed for now
       // window.alert('End game!');
     }
   }, [game]);
@@ -89,16 +94,11 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   return (
     <>
       <div className='md:w-5/6'>
-        <div className='flex m-1.5 mb-1'>
-          <button onClick={ () => socketGame.emit('game-ready-to-play', player.uid) } disabled={ isReadyPlayer }>I'm
-            Ready
-          </button>
-          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound }>
-            { gameStarted ? 'Next Round' : 'Start Round' }
-          </button>
-        </div>
         <div className='flex m-1.5 mb-2'>
-          <button onClick={ onEndTurn } disabled={ !canIEndTorn }>End Turn</button>
+          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
+            { gameStarted ? 'Next Round' : 'Start Game' }
+          </button>
+          <button onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
           <button onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
         </div>
         {
@@ -107,20 +107,25 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
           )
         }
       </div>
-      <div className='md:w-1/6 p-1.5'>
-        { game.rounds.length
-          ? <button onClick={ handleClickStartGame }
-                    className='m-0 mb-2'>Restart Game</button>
-          : <button onClick={ handleClickStartGame }
-                    className='m-0 mb-2' disabled={ !game.allPlayersReadyToGame }>New Game</button> }
+      <div className='md:w-1/6 p-1.5 flex flex-col items-start'>
+        <button onClick={ readyToPlay } disabled={ isReadyPlayer }
+                className='m-0 mb-2'>
+          { 'I\'m Ready' }
+        </button>
         { gameStarted && <RoundInfo game={ game }/> }
         <div className='flex text-lg font-bold'>Players:</div>
         <ul className='mb-2'>{
           game.players.map(p => (
-            <li key={ p.uid }>{ game.readyPlayers.includes(p.uid) ? <CheckIcon/> : <MinusIcon/> } { p.username }</li>))
+            <li key={ p.uid }>{ game.readyPlayers.includes(p.uid)
+              ? <CheckIcon style={ { color: 'lightgreen' } }/>
+              : <MinusIcon style={ { color: 'hotpink' } }/> } { p.username }
+            </li>))
         }</ul>
         <button onClick={ () => socketGame.emit('game-reset') }
-                className='m-0 mb-2' disabled={ false }>Reset
+                className='mt-auto' disabled={ false }>Reset
+        </button>
+        <button onClick={ () => socketGame.emit('log-state') }
+                className='mt-auto mt-2' disabled={ false }>Log
         </button>
       </div>
     </>

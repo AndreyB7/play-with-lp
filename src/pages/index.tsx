@@ -5,18 +5,28 @@ import useCurrentPlayer from '../utils/useCurrentPlayer';
 export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState('');
-  const { updatePlayer } = useCurrentPlayer();
+  const [password, setPassword] = useState('');
+  const [error, setFormError] = useState('');
+
+  const { getPlayer, updatePlayer, getError, setError } = useCurrentPlayer();
 
   useEffect(() => {
-    const storageUsername = localStorage.getItem('username');
-    if (storageUsername) {
-      setUsername(storageUsername);
-    }
+    const storageUsername = localStorage.getItem('username') ?? '';
+    const storagePassword = localStorage.getItem('passkey') ?? '';
+    setUsername(storageUsername);
+    setPassword(storagePassword);
+    setFormError(getError());
+    setError('');
   }, []);
 
-  const handleClick = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     localStorage.setItem('username', username);
-    updatePlayer('username', username);
+    localStorage.setItem('passkey', password);
+    const player = getPlayer();
+    if (player) {
+      updatePlayer('username', username);
+    }
     router.push('/new-game');
   }
 
@@ -26,19 +36,28 @@ export default function Home() {
         <h3 className="font-bold text-white text-xl">
           How people should call you?
         </h3>
-        <input
-          type="text"
-          placeholder="Identity..."
-          value={ username }
-          className="p-3 border rounded-md outline-none"
-          onChange={ (e) => setUsername(e.target.value) }
-        />
-        <button
-          onClick={ handleClick }
-          className="bg-white border rounded-md px-4 py-2 text-xl"
-        >
-          Go!
-        </button>
+          <input
+            type="text"
+            placeholder="Identity..."
+            value={ username }
+            className="p-3 border rounded-md outline-none"
+            onChange={ (e) => setUsername(e.target.value) }
+          />
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder="Passkey..."
+            value={ password }
+            className="p-3 border rounded-md outline-none"
+            onChange={ (e) => setPassword(e.target.value) }
+          />
+          { error && <div className='error'>{ error }</div> }
+          <button
+            onClick={ handleSubmit }
+            className="bg-white border rounded-md px-4 py-2 text-xl"
+          >
+            Go!
+          </button>
       </main>
     </div>
   );

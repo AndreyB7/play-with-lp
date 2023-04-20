@@ -72,6 +72,11 @@ button {
     padding: 5px 15px;
     text-transform: uppercase;
     border-radius: 5px;
+    transition: opacity .2s ease;
+}
+
+button:hover {
+    opacity:.9;
 }
 
 button:disabled {
