@@ -47,8 +47,8 @@ const NewGame = () => {
       socketGame.emit('game-join', player);
     });
 
-    socketGame.on('player-joined', data => {
-      console.log('player-joined', data);
+    socketGame.on('player-joined', uid => {
+      socketGame.emit('game-ready-to-play', uid);
     });
 
     socketGame.on('update-game', game => {

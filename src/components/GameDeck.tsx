@@ -111,9 +111,10 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
 
   const updateGame = (cards) => {
     game.rounds[0] = {
+      ...game.rounds[0],
       deck: cards.deck,
       table: cards.table,
-      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override.
+      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override
     }
     handleMove(game);
   }

@@ -5,7 +5,7 @@ import { getShuffledDeck } from '../../utils/useShuffledDeck';
 export const initGame: Game = {
   players: [],
   rounds: [],
-  uid: uuidv4(),
+  gid: uuidv4(),
   readyPlayers: [],
   allPlayersReadyToGame: false,
   currentHand: undefined,
@@ -20,6 +20,12 @@ const limitPlayersCount = parseInt(process.env.LIMIT_PLAYERS_COUNT, 10) || 8;
 const currentGame: Game = { ...initGame };
 const globalPlayersList: Array<Player> = [];
 
+const calcRoundScore = (round) => {
+  round.score = {};
+  for (const uid in round.hands) {
+    round.score[`${ uid }`] = round.hands[`${ uid }`].reduce((sum, c) => sum + c.score, 0)
+  }
+}
 export default function SocketHandler(req, res) {
   // It means that socket server was already initialised
   if (res.socket.server.io) {
@@ -41,15 +47,9 @@ export default function SocketHandler(req, res) {
     })
 
     socket.on('connect-player', (player: Player) => {
-      if (player.uid && globalPlayersList.some(p => p.uid === player.uid)) {
-        if (player.sid !== socket.id) {
-          // update reconnected player with new socket.id
-          const inGamePlayer = currentGame.players.find(p => p.uid === player.uid);
-          if (inGamePlayer) {
-            inGamePlayer.sid = socket.id;
-          }
-          player.sid = socket.id;
-        }
+      const currentPlayer = globalPlayersList.find(p => p.uid === player.uid);
+      if (player.uid && currentPlayer) {
+        currentPlayer.sid = socket.id;
         socket.emit('connect-success', player);
         return;
       }
@@ -62,13 +62,10 @@ export default function SocketHandler(req, res) {
     socket.on('disconnect', (reason) => {
       console.log('Disconnect (Reason: %s, ID: %s)', reason, socket.id);
 
-      const idx = globalPlayersList.findIndex(p => p.uid === socket.id)
+      const idx = globalPlayersList.findIndex(p => p.sid === socket.id)
       if (idx > -1) {
-        // Todo Here we can process disconnected player
-        // notify player 'not ready'
-
-        // clear inGame player
-        currentGame.players = currentGame.players.filter(p => p.uid !== globalPlayersList[idx].uid);
+        // Here we can process disconnected player
+        currentGame.readyPlayers = currentGame.readyPlayers.filter(uid => uid !== globalPlayersList[idx].uid);
         gameUpdate(currentGame);
         // globalPlayersList.splice(idx, 1);
       }
@@ -98,6 +95,10 @@ export default function SocketHandler(req, res) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
+      if (currentGame.gameStatus === 'endRound') {
+        calcRoundScore(currentGame.rounds[0]);
+      }
+
       gameUpdate(currentGame);
     }
 
@@ -113,9 +114,14 @@ export default function SocketHandler(req, res) {
       }
       currentGame.players.push(player);
       if (currentGame.gameStatus === 'started') {
-        // todo here we can send cards to new hand
+        // here we send cards to new hand
+        const countCardsToHand = currentGame.rounds.length - 1 + 3; // -1 - started game has min one round
+        currentGame.rounds[0].hands[`${ player.uid }`] = [];
+        for (let i = 0; i < countCardsToHand; i++) {
+          currentGame.rounds[0].hands[`${ player.uid }`].push(currentGame.rounds[0].deck.pop())
+        }
       }
-      socket.emit('player-joined');
+      socket.emit('player-joined', player.uid);
       gameUpdate(currentGame);
     })
 
@@ -127,7 +133,8 @@ export default function SocketHandler(req, res) {
       const newRound: Round = {
         deck: getShuffledDeck(),
         hands: currentGame.players.reduce((p, c) => ({ ...p, [`${ c.uid }`]: [] }), {}),
-        table: []
+        table: [],
+        score: {}
       };
 
       const countCardsToHand = currentGame.rounds.length + 3;
@@ -140,7 +147,7 @@ export default function SocketHandler(req, res) {
       }
       newRound.table.push(newRound.deck.pop());
       if (currentGame.rounds.length === 0) {
-        currentGame.currentHand = currentGame.players[0];
+        currentGame.currentHand = currentGame.players[currentGame.players.length - 1].uid;
       }
       currentGame.rounds.unshift(newRound); // new round first
       currentGame.playerHasWord = undefined;
@@ -165,7 +172,7 @@ export default function SocketHandler(req, res) {
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
-    socket.on('game-move', (newGame:Game) => {
+    socket.on('game-move', (newGame: Game) => {
       const myUID = globalPlayersList.find(x => x.sid === socket.id).uid;
 
       currentGame.rounds[0] = {
@@ -174,7 +181,8 @@ export default function SocketHandler(req, res) {
         hands: {
           ...currentGame.rounds[0].hands,
           [`${ myUID }`]: newGame.rounds[0].hands[`${ myUID }`]
-        }
+        },
+        score: newGame.rounds[0].score
       };
       gameUpdate(currentGame);
     })
@@ -219,5 +227,6 @@ export default function SocketHandler(req, res) {
 
 function logState() {
   console.log('Game', currentGame);
+  console.log('Rounds', currentGame.rounds);
   console.log('GlobalPlayers', globalPlayersList);
 }

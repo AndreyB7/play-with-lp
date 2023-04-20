@@ -6,7 +6,9 @@ interface Props {
 
 const RoundInfo: FC<Props> = ({game}) => {
   const currentRoundNumber: number = useMemo(() => game.rounds.length, [game]);
-  const currentHand: string = useMemo(() => game.currentHand?.username ?? '', [game]);
+  const currentHand: string = useMemo(() =>
+    game.players.find(x => x.uid === game.currentHand)?.username ?? '', [game]
+  );
   return (
     <div className='mb-2'>
       <div className='capitalize'>Game: {game.gameStatus}</div>

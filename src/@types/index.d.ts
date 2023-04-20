@@ -16,10 +16,11 @@ type Round = {
   hands: { [key: string]: Deck }
   table: Deck;
   deck: Deck;
+  score: { [key: string]: number }
 }
 
 type Game = {
-  uid: string;
+  gid: string;
   players: Array<Player>;
   rounds: Array<Round>;
   readyPlayers: Array<string>;

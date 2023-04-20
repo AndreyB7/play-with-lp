@@ -4,6 +4,7 @@ import RoundInfo from '../components/RoundInfo';
 import GameDeck from '../components/GameDeck';
 import CheckIcon from '../components/svg/check.svg'
 import MinusIcon from '../components/svg/minus.svg'
+import ScoreInfo from "./ScoreInfo";
 
 interface Props {
   game: Game,
@@ -21,7 +22,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-move', game);
   }
 
-  const onEndTurn = () => {
+  const onEndTurn = (e) => {
+    e.target.disabled = true; // prevent double click
     socketGame.emit('game-end-turn');
   }
   const onHasWord = () => {
@@ -45,15 +47,22 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   }, [game.rounds]);
 
   const isMyTurn = useMemo(() => {
-    return game.currentHand && game.currentHand.uid === player.uid;
+    return game.currentHand === player.uid;
   }, [game, player]);
 
   const iSaidWord = useMemo(() => {
     return game.playerHasWord === player.uid;
   }, [game, player]);
 
+  const isHandWithRightCardsCount = useMemo(() => {
+    if (!game.rounds.length) {
+      return true;
+    }
+    return game.rounds[0].hands[`${player.uid}`].length === game.rounds.length + 2;
+  }, [game]);
+
   const canIEndTurn = useMemo(() => {
-    if (isRoundStarted && isMyTurn) {
+    if (isRoundStarted && isMyTurn && isHandWithRightCardsCount) {
       return !(game.isLastCircle && iSaidWord);
     }
 
@@ -61,12 +70,15 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   }, [isRoundStarted, isMyTurn, game, iSaidWord]);
 
   const canISayWord = useMemo(() => {
-    if (isRoundStarted) {
+    if (isRoundStarted && isHandWithRightCardsCount) {
       return !game.playerHasWord && isMyTurn;
     }
-
     return false;
   }, [isRoundStarted, game]);
+
+  const showScore = () => {
+    return true
+  }
 
   const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [game]);
 
@@ -85,9 +97,13 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   }, [isMyTurn, game, iSaidWord]);
 
   useEffect(() => {
+    if (game.gameStatus === 'endRound') {
+      // todo here we can process end round
+    }
     if (game.gameStatus === 'finished') {
-      // todo here we can process end game - we have gameEnd status displayed for now
-      // window.alert('End game!');
+      // todo here we can process end game
+      // calcRoundScore(game.rounds[0]);
+      // calcGameScore(game);
     }
   }, [game]);
 
@@ -121,11 +137,12 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
               : <MinusIcon style={ { color: 'hotpink' } }/> } { p.username }
             </li>))
         }</ul>
+        { showScore && <ScoreInfo game={ game }/> }
         <button onClick={ () => socketGame.emit('game-reset') }
                 className='mt-auto' disabled={ false }>Reset
         </button>
         <button onClick={ () => socketGame.emit('log-state') }
-                className='mt-auto mt-2' disabled={ false }>Log
+                className='mt-2' disabled={ false }>Log
         </button>
       </div>
     </>
