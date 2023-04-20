@@ -10,7 +10,7 @@ const useCurrentPlayer = (): UseStoragePlayer => {
   const isBrowser: boolean = ((): boolean => typeof window !== 'undefined')();
 
   const getPlayer = (): Player => {
-    let data: Player = { uid: '', username: ''};
+    let data: Player = { uid: '', username: '', sid: ''};
 
     const rawData = isBrowser ? window['sessionStorage']['player'] : '';
     if (rawData) {
