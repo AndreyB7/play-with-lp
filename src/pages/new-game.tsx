@@ -9,7 +9,7 @@ let socketGame;
 
 const NewGame = () => {
 
-  const { getPlayer, setPlayer } = useCurrentPlayer();
+  const { getPlayer, setPlayer, setError } = useCurrentPlayer();
   const player = getPlayer();
 
   const [game, setGame] = useState<Game | null>(null);
@@ -20,7 +20,7 @@ const NewGame = () => {
   useEffect(() => {
     socketInitializer()
       .then(socket => {
-        socket.emit('access', player);
+        socket.emit('access', localStorage.getItem('passkey'));
       });
 
     return () => {
@@ -33,22 +33,22 @@ const NewGame = () => {
     socketGame = io();
 
     socketGame.on("unauthorized", (message) => {
-      localStorage.setItem('error', message);
+      setError(message);
       router.push('/');
     });
 
     socketGame.on("authorized", () => {
-      delete player.password;
       socketGame.emit('connect-player', player);
     });
 
     socketGame.on('connect-success', player => {
+      setPlayer(player);
+      localStorage.setItem('uid', player.uid);
       socketGame.emit('game-join', player);
     });
 
     socketGame.on('player-joined', data => {
       console.log('player-joined', data);
-      setPlayer(data);
     });
 
     socketGame.on('update-game', game => {
@@ -62,8 +62,8 @@ const NewGame = () => {
     });
 
     socketGame.on("disconnect", () => {
-      console.log("disconnected by socket");
       router.push('/');
+      console.log("disconnected by socket");
     });
 
     return socketGame;

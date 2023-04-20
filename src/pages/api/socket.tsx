@@ -5,7 +5,7 @@ import { getShuffledDeck } from '../../utils/useShuffledDeck';
 export const initGame: Game = {
   players: [],
   rounds: [],
-  uid: uuidv4,
+  uid: uuidv4(),
   readyPlayers: [],
   allPlayersReadyToGame: false,
   currentHand: undefined,
@@ -32,28 +32,30 @@ export default function SocketHandler(req, res) {
 
   const onConnection = (socket) => {
 
-    socket.on('access', (player: Player) => {
-      const connectedPlayer = globalPlayersList.find(p => p.uid === player.uid);
-      if (connectedPlayer) {
-        // renew socket id for connected player with saved session id
-        connectedPlayer.uid = socket.id;
+    socket.on('access', (passkey: string) => {
+      if (passkey === process.env.PASSWORD) {
         return socket.emit("authorized");
       }
-      if (player.password === process.env.PASSWORD) {
-        return socket.emit("authorized");
-      }
-      console.log("Unauthorized: Disconnecting socket ", socket.id);
       socket.emit("unauthorized", "Wrong Passkey");
       return socket.disconnect();
     })
 
     socket.on('connect-player', (player: Player) => {
-      console.log('Connected new player (ID: %s)', socket.id);
-      delete player.password;
-      if (!globalPlayersList.some(p=>p.uid === socket.id)) {
-        player.uid = socket.id;
-        globalPlayersList.push(player);
+      if (player.uid && globalPlayersList.some(p => p.uid === player.uid)) {
+        if (player.sid !== socket.id) {
+          // update reconnected player with new socket.id
+          const inGamePlayer = currentGame.players.find(p => p.uid === player.uid);
+          if (inGamePlayer) {
+            inGamePlayer.sid = socket.id;
+          }
+          player.sid = socket.id;
+        }
+        socket.emit('connect-success', player);
+        return;
       }
+      player.uid = uuidv4();
+      player.sid = socket.id;
+      globalPlayersList.push(player);
       socket.emit('connect-success', player);
     })
 
@@ -63,8 +65,11 @@ export default function SocketHandler(req, res) {
       const idx = globalPlayersList.findIndex(p => p.uid === socket.id)
       if (idx > -1) {
         // Todo Here we can process disconnected player
-        // currentGame.players = currentGame.players.filter(p => p.uid !== globalPlayersList[idx].uid);
-        // gameUpdate(currentGame);
+        // notify player 'not ready'
+
+        // clear inGame player
+        currentGame.players = currentGame.players.filter(p => p.uid !== globalPlayersList[idx].uid);
+        gameUpdate(currentGame);
         // globalPlayersList.splice(idx, 1);
       }
     })
@@ -79,7 +84,7 @@ export default function SocketHandler(req, res) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
 
-      let currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand.uid);
+      let currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand);
 
       // single player mode
       if (currentGame.players.length === 1) {
@@ -87,42 +92,30 @@ export default function SocketHandler(req, res) {
       }
 
       let newHand = (currentIdx % currentGame.players.length);
-      currentGame.currentHand = currentGame.players[newHand];
+      currentGame.currentHand = currentGame.players[newHand].uid;
 
-      if (currentGame.playerHasWord === currentGame.currentHand.uid) {
+      if (currentGame.playerHasWord === currentGame.currentHand) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
       gameUpdate(currentGame);
     }
 
-    socket.on('game-join', (data: Player) => {
-      console.log('game-join', data);
-      let player = currentGame.players.find(x => x.uid === data.uid);
-      let isNewPlayer = false;
-      if (!player) {
-        if (currentGame.players.length === limitPlayersCount) {
-          // Todo process over limit players
-          // socket.disconnect();
-          return;
-        }
-        player = data;
-        isNewPlayer = true;
-        socket.emit('player-joined', player);
+    socket.on('game-join', (player: Player) => {
+      let currentPlayer = currentGame.players.find(x => x.uid === player.uid);
+      if (currentPlayer) {
+        gameUpdate(currentGame);
+        return;
       }
-
-      const idx = globalPlayersList.findIndex(x => x.uid === socket.id);
-      if (idx > -1) {
-        globalPlayersList[idx] = { ...globalPlayersList[idx], ...player };
+      if (currentGame.players.length === limitPlayersCount) {
+        // Todo process over limit players
+        return;
       }
-
-      if (isNewPlayer) {
-        currentGame.players.push(player);
-        if (currentGame.gameStatus === 'started') {
-          // todo here we can send cards to new hand
-        }
+      currentGame.players.push(player);
+      if (currentGame.gameStatus === 'started') {
+        // todo here we can send cards to new hand
       }
-      currentGame.readyPlayers = currentGame.readyPlayers.filter(x => x !== player.uid);
+      socket.emit('player-joined');
       gameUpdate(currentGame);
     })
 
@@ -172,8 +165,8 @@ export default function SocketHandler(req, res) {
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
-    socket.on('game-move', (newGame: Game) => {
-      const myUID = globalPlayersList.find(x => x.uid === socket.id).uid;
+    socket.on('game-move', (newGame:Game) => {
+      const myUID = globalPlayersList.find(x => x.sid === socket.id).uid;
 
       currentGame.rounds[0] = {
         deck: newGame.rounds[0].deck,
@@ -212,10 +205,19 @@ export default function SocketHandler(req, res) {
       currentGame.isLastCircle = true;
       endTurn();
     })
+
+    socket.on('log-state', () => {
+      logState();
+    })
   };
 
   // Define actions inside
   io.on("connection", onConnection);
 
   res.end();
+}
+
+function logState() {
+  console.log('Game', currentGame);
+  console.log('GlobalPlayers', globalPlayersList);
 }

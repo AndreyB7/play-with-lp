@@ -9,6 +9,7 @@ type Deck = Array<Card>;
 type Player = {
   uid: string;
   username: string;
+  sid: string;
 }
 
 type Round = {
@@ -23,7 +24,7 @@ type Game = {
   rounds: Array<Round>;
   readyPlayers: Array<string>;
   allPlayersReadyToGame: boolean;
-  currentHand: Player | undefined;
+  currentHand: uid | undefined;
   playerHasWord: uid | undefined;
   isLastCircle: boolean;
   gameStatus: 'notStarted' | 'started' | 'endRound' | 'lastRound' | 'finished';
