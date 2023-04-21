@@ -32,7 +32,6 @@ const useCurrentPlayer = (): UseStoragePlayer => {
 
   const updatePlayer = (field, value): Player => {
     const player = getPlayer();
-
     return setPlayer({ ...player, [`${ field }`]: value });
   }
 

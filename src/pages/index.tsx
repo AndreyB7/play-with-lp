@@ -55,6 +55,7 @@ export default function Home() {
           <button
             onClick={ handleSubmit }
             className="bg-white border rounded-md px-4 py-2 text-xl"
+            disabled={username.length < 3}
           >
             Go!
           </button>
