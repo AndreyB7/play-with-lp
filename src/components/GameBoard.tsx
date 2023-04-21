@@ -4,6 +4,7 @@ import RoundInfo from '../components/RoundInfo';
 import GameDeck from '../components/GameDeck';
 import ScoreInfo from "./ScoreInfo";
 import PlayersInfo from "./PlayersInfo";
+import Dictionary from "./Dictionary";
 
 interface Props {
   game: Game,
@@ -129,6 +130,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         { gameStarted && <RoundInfo game={ game }/> }
         <PlayersInfo game={ game }/>
         { showScore && <ScoreInfo game={ game }/> }
+        <Dictionary socket={socketGame}/>
         <button onClick={ () => socketGame.emit('game-reset') }
                 className='mt-auto' disabled={ false }>New Table
         </button>

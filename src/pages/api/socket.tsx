@@ -2,6 +2,8 @@ import { Server } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import { getShuffledDeck } from '../../utils/useShuffledDeck';
 import useScoreCount from "../../utils/useScoreCount";
+import wordList from "../../utils/scrabble_word_list.json";
+import binarySearch from "../../utils/binarySearch";
 
 export const initGame: Game = {
   players: [],
@@ -48,6 +50,8 @@ export default function SocketHandler(req, res) {
       const currentPlayer = globalPlayersList.find(p => p.uid === player.uid);
       if (player.uid && currentPlayer) {
         currentPlayer.sid = socket.id;
+        // update if username was changed + Safari bug with empty sessionStorage value.
+        currentPlayer.username = player.username ?? currentPlayer.username;
         // im-ready on reconnect
         if (!currentGame.readyPlayers.includes(currentPlayer.uid)) {
           currentGame.readyPlayers.push(player.uid);
@@ -115,7 +119,15 @@ export default function SocketHandler(req, res) {
         // Todo process over limit players
         return;
       }
-      currentGame.players.push(player);
+      const playerToJoin= globalPlayersList.find(x => x.uid === player.uid);
+
+      if (!playerToJoin) {
+        socket.emit("unauthorized", "Please Authorize");
+        return
+      }
+
+      currentGame.players.push(globalPlayersList.find(x => x.uid === player.uid));
+
       if (currentGame.gameStatus === 'started') {
         // here we send cards to new hand
         const countCardsToHand = currentGame.rounds.length - 1 + 3; // -1 - started game has min one round
@@ -152,11 +164,12 @@ export default function SocketHandler(req, res) {
       if (currentGame.rounds.length === 0) {
         currentGame.currentHand = currentGame.players[currentGame.players.length - 1].uid;
       }
-      // clear previous round deck to save object size
-      if (currentGame.rounds[0]) {
-        currentGame.rounds[0].deck = [];
-      }
       currentGame.rounds.unshift(newRound); // new round first
+
+      // clear previous round deck to save object size
+      if (currentGame.rounds.length > 1) {
+        currentGame.rounds[1].deck = [];
+      }
       currentGame.playerHasWord = undefined;
       currentGame.isLastCircle = false;
       currentGame.gameStatus = currentGame.rounds.length === limitRoundsCount ? 'lastRound' : 'started';
@@ -217,6 +230,10 @@ export default function SocketHandler(req, res) {
       currentGame.playerHasWord = uid;
       currentGame.isLastCircle = true;
       endTurn();
+    })
+
+    socket.on('check-word', (word:string) => {
+      socket.emit('checked-word', binarySearch(wordList, word));
     })
 
     socket.on('log-state', () => {

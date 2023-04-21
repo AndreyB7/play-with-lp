@@ -7,7 +7,7 @@ interface Props {
 }
 
 const PlayersInfo: FC<Props> = ({ game }) => (
-  <div className='mb-2'>
+  <div className='mb-2 w-full'>
     <div className='flex text-lg font-bold'>Players:</div>
     <ul>{
       game.players.map(p => (

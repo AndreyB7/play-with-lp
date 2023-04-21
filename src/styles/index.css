@@ -18,7 +18,7 @@ li svg {
     position: relative;
     display: flex;
     border: 1px solid transparent;
-    border-radius: 5px;
+    border-radius: 0.375rem;
 }
 
 .min-height-card > * {
@@ -81,6 +81,10 @@ button:hover {
 
 button:disabled {
     opacity: .5;
+}
+
+.score-list {
+    text-align: center;
 }
 
 .card {
