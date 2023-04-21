@@ -135,7 +135,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
         break;
       default:
-        result = game.gameStatus !== 'started';
+        result = game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
         break;
     }
 

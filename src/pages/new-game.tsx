@@ -30,7 +30,12 @@ const NewGame = () => {
 
   const socketInitializer = async () => {
     await fetch("/api/socket");
-    socketGame = io();
+    socketGame = io(undefined, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    });
 
     socketGame.on("unauthorized", (message) => {
       setError(message);
@@ -62,7 +67,8 @@ const NewGame = () => {
     });
 
     socketGame.on("disconnect", () => {
-      router.push('/');
+      // try to refresh page and reconnect
+      router.reload();
       console.log("disconnected by socket");
     });
 
@@ -71,7 +77,7 @@ const NewGame = () => {
 
   if (game === null || connection) {
     return (
-      <div>Connection...</div>
+      <div className='p-2'>Connection...</div>
     )
   }
 

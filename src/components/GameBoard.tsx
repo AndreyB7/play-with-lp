@@ -2,9 +2,9 @@ import React, { FC, useEffect, useMemo } from 'react';
 import { Socket } from 'socket.io';
 import RoundInfo from '../components/RoundInfo';
 import GameDeck from '../components/GameDeck';
-import CheckIcon from '../components/svg/check.svg'
-import MinusIcon from '../components/svg/minus.svg'
 import ScoreInfo from "./ScoreInfo";
+import PlayersInfo from "./PlayersInfo";
+import Dictionary from "./Dictionary";
 
 interface Props {
   game: Game,
@@ -19,14 +19,15 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
   }
 
   const handlePlayerMove = (game: Game) => {
-    socketGame.emit('game-move', game);
+    socketGame.emit('game-move', { newGame: game, uid: player.uid });
   }
 
   const onEndTurn = (e) => {
     e.target.disabled = true; // prevent double click
     socketGame.emit('game-end-turn');
   }
-  const onHasWord = () => {
+  const onHasWord = (e) => {
+    e.target.disabled = true; // prevent double click
     socketGame.emit('game-has-word', player.uid);
   }
 
@@ -58,7 +59,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     if (!game.rounds.length) {
       return true;
     }
-    return game.rounds[0].hands[`${player.uid}`].length === game.rounds.length + 2;
+    return game.rounds[0].hands[`${ player.uid }`].length === game.rounds.length + 2;
   }, [game]);
 
   const canIEndTurn = useMemo(() => {
@@ -89,8 +90,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
       case 'started':
       case 'endRound':
         return isMyTurn && game.isLastCircle && iSaidWord;
-      case 'finished':
       case 'lastRound':
+      case 'finished':
       default:
         return false;
     }
@@ -102,8 +103,6 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     }
     if (game.gameStatus === 'finished') {
       // todo here we can process end game
-      // calcRoundScore(game.rounds[0]);
-      // calcGameScore(game);
     }
   }, [game]);
 
@@ -129,17 +128,11 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
           { 'I\'m Ready' }
         </button>
         { gameStarted && <RoundInfo game={ game }/> }
-        <div className='flex text-lg font-bold'>Players:</div>
-        <ul className='mb-2'>{
-          game.players.map(p => (
-            <li key={ p.uid }>{ game.readyPlayers.includes(p.uid)
-              ? <CheckIcon style={ { color: 'lightgreen' } }/>
-              : <MinusIcon style={ { color: 'hotpink' } }/> } { p.username }
-            </li>))
-        }</ul>
+        <PlayersInfo game={ game }/>
         { showScore && <ScoreInfo game={ game }/> }
+        <Dictionary socket={socketGame}/>
         <button onClick={ () => socketGame.emit('game-reset') }
-                className='mt-auto' disabled={ false }>Reset
+                className='mt-auto' disabled={ false }>New Table
         </button>
         <button onClick={ () => socketGame.emit('log-state') }
                 className='mt-2' disabled={ false }>Log
