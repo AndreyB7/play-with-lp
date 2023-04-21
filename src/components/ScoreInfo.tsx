@@ -10,6 +10,8 @@ const ScoreInfo: FC<Props> = ({ game }) => {
     return null
   }
 
+  const reversedRounds = Array.from(game.rounds).reverse();
+
   return (
     <div className='mb-2 w-full'>
       <div className='flex text-lg font-bold'>Score:</div>
@@ -18,7 +20,7 @@ const ScoreInfo: FC<Props> = ({ game }) => {
         <div key={ player.uid }>
           <div>{ player.username.substring(0, 3) }</div>
           <hr/>
-          {game.rounds.reverse().map((round,idx) => (
+          {reversedRounds.map((round,idx) => (
             <div key={idx}>{ round.score[`${ player.uid }`] ?? 0 }</div>
           ))}
           <hr className='my-0.5'/>
