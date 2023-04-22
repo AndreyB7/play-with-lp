@@ -6,6 +6,7 @@ import withPrivateRoute from '../components/withPrivateRoute';
 import { useRouter } from "next/router";
 
 let socketGame;
+let wasUnautorized = false;
 
 const NewGame = () => {
 
@@ -38,11 +39,13 @@ const NewGame = () => {
     });
 
     socketGame.on("unauthorized", (message) => {
+      wasUnautorized = true;
       setError(message);
       router.push('/');
     });
 
     socketGame.on("authorized", () => {
+      wasUnautorized = false;
       socketGame.emit('connect-player', player);
     });
 
@@ -57,7 +60,7 @@ const NewGame = () => {
     });
 
     socketGame.on('update-game', game => {
-      console.log('update-game', game);
+      process.env.NODE_ENV == 'development' && console.log('update-game', game);
       setConnection(false);
       setGame(game);
     });
@@ -66,10 +69,15 @@ const NewGame = () => {
       router.push('/');
     });
 
+    let attempts = 3;
     socketGame.on("disconnect", () => {
       // try to refresh page and reconnect
       // TODO check reconnect with login and in-game reload
-      socketGame.emit('connect-player', player);
+      if (wasUnautorized && attempts > 0) {
+        socketGame.emit('connect-player', player);
+        attempts--;
+        console.log(attempts);
+      }
       // router.reload();
       console.log("disconnected by socket");
     });

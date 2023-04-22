@@ -52,7 +52,7 @@ const DraggableBlock: FC<Props> = (
   return (
     <div ref={ provided.innerRef }
          className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${ snapshot.isDraggingOver ? ' someOver' : '' }` }
-         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : 'transparent' } }>
+         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : block === 'drop' ? '#ffffff80' : 'transparent' } }>
       {
         showCards.map((card, index) => (
           <Draggable

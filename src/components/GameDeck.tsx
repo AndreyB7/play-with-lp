@@ -13,12 +13,14 @@ interface Props {
 export interface iCards {
   deck: Deck;
   table: Deck;
+  drop: Deck;
   playerHand: Deck;
 }
 
 const partNames = {
   deck: 'Deck',
   table: 'Discard',
+  drop: 'Subtract',
   playerHand: 'My Hand',
 }
 
@@ -27,6 +29,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
+    drop: [],
     playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
@@ -34,6 +37,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     setCards({
       deck: game.rounds[0].deck,
       table: game.rounds[0].table,
+      drop: [],
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
@@ -81,6 +85,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       switch (destination.droppableId) {
         case 'table':
         case 'deck':
+        case 'drop':
           destinationList.push(removed);
           break;
         default:
@@ -95,7 +100,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       };
 
       setCards(newCards);
-      updateGame(newCards);
+      //updateGame(newCards);
 
       if (source.droppableId === 'deck') {
         setGotCardFromDeck(true);
@@ -133,6 +138,9 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         break;
       case 'table':
         result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
+        break;
+      case 'drop':
+        result = false;
         break;
       default:
         result = game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';

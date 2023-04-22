@@ -7,7 +7,7 @@ interface Props {
 
 const Dictionary: FC<Props> = ({ socket }) => {
   const [search, setSearch] = useState('');
-  const [isWord, setIsWord] = useState(false);
+  const [isWord, setIsWord] = useState(undefined);
 
   useEffect(() => {
     if (socket) {
@@ -19,7 +19,7 @@ const Dictionary: FC<Props> = ({ socket }) => {
 
   const handleChange = (e) => {
     setSearch(e.target.value);
-    setIsWord(false);
+    setIsWord(undefined);
   }
 
   const handleKeyPress = event => {
@@ -29,25 +29,27 @@ const Dictionary: FC<Props> = ({ socket }) => {
     }
   };
   const checkWord = () => {
-    if (search.length < 3) return
+    if (search.length < 2) return
     socket.emit('check-word', search);
   }
 
   return (
     <div className='mb-2 w-full'>
       <div className='flex text-lg font-bold'>Dictionary:</div>
-      <input
-        type="text"
-        style={ {
-          outlineColor: isWord ? 'green' : ''
-        } }
-        placeholder="Check word..."
-        value={ search }
-        className="border rounded-md outline-none p-1.5"
-        onChange={ handleChange }
-        onBlur={ checkWord }
-        onKeyPress={ handleKeyPress }
-      />
+      <div className={
+        `dictionary-search rounded-md outline overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
+        }` }>
+        <input
+          type="text"
+          placeholder="Check word..."
+          value={ search }
+          className="outline-none rounded-md p-1.5 w-full"
+          onChange={ handleChange }
+          onBlur={ checkWord }
+          onKeyPress={ handleKeyPress }
+        />
+        { isWord !== undefined && <div className='text-center font-bold'>{ isWord ? 'Yep!' : 'Nope!' }</div> }
+      </div>
     </div>
   )
 }

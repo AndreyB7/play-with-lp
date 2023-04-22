@@ -5,6 +5,20 @@
 
 @import 'tailwindcss/utilities';
 
+:root {
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    background-color: #2f103c;
+    color: #fff;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
 li svg {
     fill: currentColor;
     display: inline;
@@ -33,32 +47,18 @@ li svg {
     overflow: hidden;
 }
 
+.drop-drag-wrap > div {
+    margin-right: -90px;
+}
+
 .deck .min-height-card > *,
 .table .min-height-card > * {
     position: absolute;
     top: 0;
 }
 
-.deck {
-    margin-right: 20px;
-}
-
 .game-wrap > * {
     min-width: 126px;
-}
-
-:root {
-    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-    background-color: #242424;
-    color: #fff;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
 }
 
 button, input {
@@ -147,4 +147,16 @@ button:disabled {
 .deck-part-title {
     padding-left: 1rem;
     font-weight: bold;
+}
+
+.dictionary-search {
+    position: relative;
+}
+.dictionary-search.yep {
+    outline-color: lightgreen;
+    background: lightgreen;
+}
+.dictionary-search.nope {
+    outline-color: hotpink;
+    background: hotpink;
 }
