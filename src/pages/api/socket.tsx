@@ -87,6 +87,11 @@ export default function SocketHandler(req, res) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
 
+      currentGame.rounds[0].turnState = {
+        gotFromDeck: false,
+        gotFromTable: false,
+        pushedToTable: false,
+      }
       currentGame.currentHand = findNextPlayer(currentGame.currentHand, currentGame.players).uid;
 
       if (currentGame.playerHasWord === currentGame.currentHand) {
