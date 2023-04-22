@@ -27,7 +27,7 @@ export default function Home() {
     if (player) {
       updatePlayer('username', username);
     }
-    router.push('/new-game');
+    router.push('/game');
   }
 
   return (
