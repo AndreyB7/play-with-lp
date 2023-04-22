@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
+import { findNextPlayer, initNewRound } from '../../utils/gameHelpers';
 import { v4 as uuidv4 } from 'uuid';
-import { getShuffledDeck } from '../../utils/useShuffledDeck';
 import useScoreCount from "../../utils/useScoreCount";
 import wordList from "../../utils/scrabble_word_list.json";
 import binarySearch from "../../utils/binarySearch";
@@ -87,15 +87,7 @@ export default function SocketHandler(req, res) {
         currentGame.rounds[0].deck = currentGame.rounds[0].table.slice(0, currentGame.rounds[0].table.length - 1);
       }
 
-      let currentIdx = 1 + currentGame.players.findIndex(x => x.uid === currentGame.currentHand);
-
-      // single player mode end round
-      if (currentGame.players.length === 1) {
-        currentIdx = 0;
-      }
-
-      let newHand = (currentIdx % currentGame.players.length);
-      currentGame.currentHand = currentGame.players[newHand].uid;
+      currentGame.currentHand = findNextPlayer(currentGame.currentHand, currentGame.players).uid;
 
       if (currentGame.playerHasWord === currentGame.currentHand) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
@@ -140,31 +132,16 @@ export default function SocketHandler(req, res) {
       gameUpdate(currentGame);
     })
 
-    socket.on('game-next-round', () => {
+    socket.on('game-next-round', (player: Player) => {
       if (currentGame.gameStatus === 'lastRound') {
         return;
       }
 
-      const newRound: Round = {
-        deck: getShuffledDeck(),
-        hands: currentGame.players.reduce((p, c) => ({ ...p, [`${ c.uid }`]: [] }), {}),
-        table: [],
-        score: {}
-      };
-
-      const countCardsToHand = currentGame.rounds.length + 3;
-      for (let i = 0; i < countCardsToHand; i++) {
-        currentGame.players.forEach(player => {
-          if (currentGame.readyPlayers.includes(player.uid)) {
-            newRound.hands[`${ player.uid }`].push({ ...newRound.deck.pop(), dropped: false })
-          }
-        });
-      }
-      newRound.table.push(newRound.deck.pop());
-      if (currentGame.rounds.length === 0) {
-        currentGame.currentHand = currentGame.players[currentGame.players.length - 1].uid;
-      }
+      const newRound = initNewRound(currentGame, player);
       currentGame.rounds.unshift(newRound); // new round first
+
+      // This will fail if previously croupier left game
+      currentGame.currentHand = findNextPlayer(currentGame.rounds[0].croupier, currentGame.players).uid;
 
       // clear previous round deck to save object size
       if (currentGame.rounds.length > 1) {
@@ -194,13 +171,11 @@ export default function SocketHandler(req, res) {
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
     socket.on('game-move', ({ newGame, uid }) => {
       currentGame.rounds[0] = {
-        deck: newGame.rounds[0].deck,
-        table: newGame.rounds[0].table,
+        ...newGame.rounds[0],
         hands: {
           ...currentGame.rounds[0].hands,
           [`${ uid }`]: newGame.rounds[0].hands[`${ uid }`]
         },
-        score: newGame.rounds[0].score
       };
       gameUpdate(currentGame);
     })

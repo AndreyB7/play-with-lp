@@ -15,7 +15,7 @@ interface Props {
 const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   const handleClickNextRound = () => {
-    socketGame.emit('game-next-round');
+    socketGame.emit('game-next-round', player);
   }
 
   const handlePlayerMove = (game: Game) => {
@@ -39,9 +39,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return game.readyPlayers.find(x => x === player.uid) !== undefined;
   }, [game, player]);
 
-  const isAllReady = () => {
-    return game.allPlayersReadyToGame;
-  }
+  const isAllReady = useMemo(() => game.allPlayersReadyToGame, [game]);
 
   const isRoundStarted = useMemo(() => {
     return game.rounds.length > 0;
@@ -130,7 +128,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         { gameStarted && <RoundInfo game={ game }/> }
         <PlayersInfo game={ game }/>
         { showScore && <ScoreInfo game={ game }/> }
-        <Dictionary socket={socketGame}/>
+        <Dictionary socket={ socketGame }/>
         <button onClick={ () => socketGame.emit('game-reset') }
                 className='mt-auto' disabled={ false }>New Table
         </button>
