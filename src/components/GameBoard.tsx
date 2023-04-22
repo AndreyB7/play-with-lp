@@ -27,14 +27,6 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-has-word', player.uid);
   }
 
-  const readyToPlay = () => {
-    socketGame.emit('game-ready-to-play', player.uid)
-  }
-
-  const isReadyPlayer = useMemo(() => {
-    return game.readyPlayers.find(x => x === player.uid) !== undefined;
-  }, [game, player]);
-
   const isAllReady = useMemo(() => game.allPlayersReadyToGame, [game]);
 
   const isRoundStarted = useMemo(() => {
@@ -117,19 +109,15 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         }
       </div>
       <div className='md:w-1/6 p-1.5 flex flex-col items-start'>
-        <button onClick={ readyToPlay } disabled={ isReadyPlayer }
-                className='m-0 mb-2'>
-          { 'I\'m Ready' }
+        <button onClick={ () => socketGame.emit('game-reset') }
+                className='mb-2' disabled={ false }>New Game
         </button>
         { gameStarted && <RoundInfo game={ game }/> }
         <PlayersInfo game={ game }/>
         { showScore && <ScoreInfo game={ game }/> }
         <Dictionary socket={ socketGame }/>
-        <button onClick={ () => socketGame.emit('game-reset') }
-                className='mt-auto' disabled={ false }>New Table
-        </button>
         <button onClick={ () => socketGame.emit('log-state') }
-                className='mt-2' disabled={ false }>Log
+                className='mt-2 mt-auto hidden' disabled={ false }>Log
         </button>
       </div>
     </>

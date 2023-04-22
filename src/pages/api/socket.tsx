@@ -125,7 +125,7 @@ export default function SocketHandler(req, res) {
 
       currentGame.players.push(globalPlayersList.find(x => x.uid === player.uid));
 
-      if (currentGame.gameStatus === 'started') {
+      if (currentGame.gameStatus !== 'notStarted') {
         // here we send cards to new hand
         const countCardsToHand = currentGame.rounds.length - 1 + 3; // -1 - started game has min one round
         currentGame.rounds[0].hands[`${ player.uid }`] = [];

@@ -14,12 +14,14 @@ interface Props {
 export interface iCards {
   deck: Deck;
   table: Deck;
+  drop: Deck;
   playerHand: Deck;
 }
 
 const partNames = {
   deck: 'Deck',
   table: 'Discard',
+  drop: 'Subtract',
   playerHand: 'My Hand',
 }
 
@@ -41,6 +43,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
+    drop: [],
     playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
@@ -48,6 +51,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     setCards({
       deck: game.rounds[0].deck,
       table: game.rounds[0].table,
+      drop: [],
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
@@ -84,6 +88,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
       switch (destination.droppableId) {
         case 'table':
         case 'deck':
+        case 'drop':
           destinationList.push(removed);
           break;
         default:
@@ -135,6 +140,8 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     switch (part) {
       case 'deck':
         return true;
+      case 'drop':
+        return  false;
       case 'table':
         if (!isMyTurn || round === undefined) {
           return true;
