@@ -12,8 +12,10 @@ type Player = {
   sid: string;
 }
 
+type PlayersHand = Array<Card & { dropped: boolean }>
+
 type Round = {
-  hands: { [key: string]: Deck }
+  hands: { [key: string]: PlayersHand }
   table: Deck;
   deck: Deck;
   score: { [uid: string]: number }

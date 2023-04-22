@@ -119,7 +119,7 @@ export default function SocketHandler(req, res) {
         // Todo process over limit players
         return;
       }
-      const playerToJoin= globalPlayersList.find(x => x.uid === player.uid);
+      const playerToJoin = globalPlayersList.find(x => x.uid === player.uid);
 
       if (!playerToJoin) {
         socket.emit("unauthorized", "Please Authorize");
@@ -133,7 +133,7 @@ export default function SocketHandler(req, res) {
         const countCardsToHand = currentGame.rounds.length - 1 + 3; // -1 - started game has min one round
         currentGame.rounds[0].hands[`${ player.uid }`] = [];
         for (let i = 0; i < countCardsToHand; i++) {
-          currentGame.rounds[0].hands[`${ player.uid }`].push(currentGame.rounds[0].deck.pop())
+          currentGame.rounds[0].hands[`${ player.uid }`].push({ ...currentGame.rounds[0].deck.pop(), dropped: false })
         }
       }
       socket.emit('player-joined', player.uid);
@@ -156,7 +156,7 @@ export default function SocketHandler(req, res) {
       for (let i = 0; i < countCardsToHand; i++) {
         currentGame.players.forEach(player => {
           if (currentGame.readyPlayers.includes(player.uid)) {
-            newRound.hands[`${ player.uid }`].push(newRound.deck.pop())
+            newRound.hands[`${ player.uid }`].push({ ...newRound.deck.pop(), dropped: false })
           }
         });
       }
@@ -192,7 +192,7 @@ export default function SocketHandler(req, res) {
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
-    socket.on('game-move', ({newGame,uid}) => {
+    socket.on('game-move', ({ newGame, uid }) => {
       currentGame.rounds[0] = {
         deck: newGame.rounds[0].deck,
         table: newGame.rounds[0].table,
@@ -232,7 +232,7 @@ export default function SocketHandler(req, res) {
       endTurn();
     })
 
-    socket.on('check-word', (word:string) => {
+    socket.on('check-word', (word: string) => {
       socket.emit('checked-word', binarySearch(wordList, word));
     })
 
