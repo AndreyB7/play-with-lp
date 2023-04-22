@@ -68,6 +68,7 @@ const NewGame = () => {
 
     socketGame.on("disconnect", () => {
       // try to refresh page and reconnect
+      // TODO check reconnect with login and in-game reload
       socketGame.emit('connect-player', player);
       // router.reload();
       console.log("disconnected by socket");
