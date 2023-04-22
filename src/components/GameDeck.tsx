@@ -135,6 +135,8 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     switch (part) {
       case 'deck':
         return true;
+      case 'drop':
+        return  false;
       case 'table':
         if (!isMyTurn || round === undefined) {
           return true;
