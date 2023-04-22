@@ -18,6 +18,11 @@ export const initNewRound = (game: Game, player: Player): Round => {
     table: [],
     score: {},
     croupier: player.uid,
+    turnState: {
+      gotFromDeck: false,
+      gotFromTable: false,
+      pushedToTable: false,
+    }
   };
 
   if (game.rounds.length > 0) {

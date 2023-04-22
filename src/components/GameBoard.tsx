@@ -18,10 +18,6 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-next-round', player);
   }
 
-  const handlePlayerMove = (game: Game) => {
-    socketGame.emit('game-move', { newGame: game, uid: player.uid });
-  }
-
   const onEndTurn = (e) => {
     e.target.disabled = true; // prevent double click
     socketGame.emit('game-end-turn');
@@ -116,7 +112,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         </div>
         {
           game.rounds.length > 0 && (
-            <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove } isMyTurn={ isMyTurn }/>
+            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } socket={ socketGame }/>
           )
         }
       </div>

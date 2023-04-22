@@ -22,6 +22,11 @@ type Round = {
   deck: Deck;
   score: { [uid: UID]: number }
   croupier: UID;
+  turnState: {
+    gotFromDeck: boolean;
+    gotFromTable: boolean;
+    pushedToTable: boolean;
+  }
 }
 
 type Game = {
@@ -36,3 +41,5 @@ type Game = {
   isLastCircle: boolean;
   gameStatus: 'notStarted' | 'started' | 'endRound' | 'lastRound' | 'finished';
 }
+
+type GameUpdateReason = 'GotCardFromTable' | 'GotCardFromDeck' | 'MoveCardToTable' | 'SortCards';

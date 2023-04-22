@@ -169,14 +169,31 @@ export default function SocketHandler(req, res) {
     })
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
-    socket.on('game-move', ({ newGame, uid }) => {
+    socket.on('game-move', (newGame: Game, player: Player, reason: GameUpdateReason) => {
+      const newTurnState = { ...currentGame.rounds[0].turnState };
+      switch (reason) {
+        case 'GotCardFromDeck':
+          newTurnState.gotFromDeck = true;
+          break;
+        case 'GotCardFromTable':
+          newTurnState.gotFromTable = true;
+          break;
+        case 'MoveCardToTable':
+          newTurnState.pushedToTable = true;
+          break;
+        default:
+          break;
+      }
+
       currentGame.rounds[0] = {
         ...newGame.rounds[0],
         hands: {
           ...currentGame.rounds[0].hands,
-          [`${ uid }`]: newGame.rounds[0].hands[`${ uid }`]
+          [`${ player.uid }`]: newGame.rounds[0].hands[`${ player.uid }`]
         },
+        turnState: newTurnState
       };
+
       gameUpdate(currentGame);
     })
 
