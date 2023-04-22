@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 let socketGame;
 let wasUnautorized = false;
 
-const NewGame = () => {
+const Game = () => {
 
   const { getPlayer, setPlayer, setError } = useCurrentPlayer();
   const player = getPlayer();
@@ -97,4 +97,4 @@ const NewGame = () => {
     </div>)
 };
 
-export default withPrivateRoute(NewGame);
+export default withPrivateRoute(Game);

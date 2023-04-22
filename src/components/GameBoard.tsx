@@ -15,11 +15,7 @@ interface Props {
 const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   const handleClickNextRound = () => {
-    socketGame.emit('game-next-round');
-  }
-
-  const handlePlayerMove = (game: Game) => {
-    socketGame.emit('game-move', { newGame: game, uid: player.uid });
+    socketGame.emit('game-next-round', player);
   }
 
   const onEndTurn = (e) => {
@@ -31,9 +27,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     socketGame.emit('game-has-word', player.uid);
   }
 
-  const isAllReady = () => {
-    return game.allPlayersReadyToGame;
-  }
+  const isAllReady = useMemo(() => game.allPlayersReadyToGame, [game]);
 
   const isRoundStarted = useMemo(() => {
     return game.rounds.length > 0;
@@ -110,7 +104,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         </div>
         {
           game.rounds.length > 0 && (
-            <GameDeck game={ game } player={ player } handleMove={ handlePlayerMove } isMyTurn={ isMyTurn }/>
+            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } socket={ socketGame }/>
           )
         }
       </div>
@@ -121,7 +115,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         { gameStarted && <RoundInfo game={ game }/> }
         <PlayersInfo game={ game }/>
         { showScore && <ScoreInfo game={ game }/> }
-        <Dictionary socket={socketGame}/>
+        <Dictionary socket={ socketGame }/>
         <button onClick={ () => socketGame.emit('log-state') }
                 className='mt-2 mt-auto hidden' disabled={ false }>Log
         </button>
