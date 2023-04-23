@@ -36,7 +36,7 @@ li svg {
     position: relative;
     display: flex;
     border: 1px solid transparent;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     overflow: hidden;
 }
 
@@ -58,10 +58,18 @@ li svg {
     width: 0 !important;
 }
 /**/
+.drop {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s ease;
+}
+.drop.end-round {
+    opacity: 1;
+    visibility: visible;
+}
 
 .playerHand-drag-wrap,
 .opponentHand-wrap {
-    margin-right: -11px;
     overflow: hidden;
 }
 
