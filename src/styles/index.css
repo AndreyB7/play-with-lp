@@ -36,19 +36,31 @@ li svg {
     position: relative;
     display: flex;
     border: 1px solid transparent;
-    border-radius: 0.375rem;
+    border-radius: 0.25rem;
     overflow: hidden;
 }
 
 .min-height-card > * {
     z-index: 0;
 }
-
-.table-drag-wrap.someOver > * {
+/* drag-move workarounds */
+.table-drag-wrap.someOver > *,
+.drop-drag-wrap.someOver > *{
     transform: translate(0, 0) !important;
 }
+.drop-drag-wrap .card {
+    margin-right: 0!important;
+}
+[data-rbd-placeholder-context-id] {
+    max-width: 20px !important;
+}
+.drop-drag-wrap [data-rbd-placeholder-context-id] {
+    width: 0 !important;
+}
+/**/
 
-.playerHand-drag-wrap {
+.playerHand-drag-wrap,
+.opponentHand-wrap {
     margin-right: -11px;
     overflow: hidden;
 }
@@ -66,7 +78,7 @@ li svg {
     position: absolute;
     top: 2px;
     left: 1.5px;
-    border-radius: 4px;
+    border-radius: .25rem;
     z-index: -1;
 }
 

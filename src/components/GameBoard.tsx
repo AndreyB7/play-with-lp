@@ -33,6 +33,10 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return game.rounds.length > 0;
   }, [game.rounds]);
 
+  const isRoundEnd = useMemo(() => {
+    return (game.gameStatus === 'endRound' || game.gameStatus === 'finished')
+  }, [game.gameStatus]);
+
   const isMyTurn = useMemo(() => {
     return game.currentHand === player.uid;
   }, [game, player]);
@@ -104,7 +108,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         </div>
         {
           game.rounds.length > 0 && (
-            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } socket={ socketGame }/>
+            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } isRoundEnd={isRoundEnd} socket={ socketGame }/>
           )
         }
       </div>

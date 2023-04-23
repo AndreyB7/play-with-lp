@@ -9,6 +9,7 @@ interface Props {
   game: Game;
   socket: Socket;
   isMyTurn: boolean;
+  isRoundEnd: boolean;
 }
 
 export interface iCards {
@@ -25,7 +26,13 @@ const partNames = {
   playerHand: 'My Hand',
 }
 
-const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
+const GameDeck: FC<Props> = (
+  { game,
+    player,
+    socket,
+    isMyTurn,
+    isRoundEnd
+  }) => {
 
   const round = useMemo(() => game.rounds[0], [game.rounds]);
   const { gotFromDeck, gotFromTable, pushedToTable } = useMemo(() => {
@@ -130,11 +137,13 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
   const updateGame = (cards, reason: GameUpdateReason) => {
     setCards(cards);
 
+    const sortDropped = [...cards.playerHand.filter(x => !x.dropped), ...cards.drop];
+
     game.rounds[0] = {
       ...game.rounds[0],
       deck: cards.deck,
       table: cards.table,
-      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override
+      hands: { [`${ player.uid }`]: sortDropped }, // only myHand to avoid other hands sort override
     }
 
     socket.emit('game-move', game, player, reason);
@@ -181,6 +190,11 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     return cards[part];
   }
 
+  if (!isRoundEnd) {
+    // show drop only on end round or end game
+    delete cards.drop;
+  }
+
   return (
     <div>
       <DragDropContext onDragEnd={ handleDragEnd }>
@@ -197,6 +211,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
                       provided={ provided }
                       snapshot={ snapshot }
                       isMyTurn={ isMyTurn }
+                      isRoundEnd={isRoundEnd}
                       gotCardFromDeck={ gotFromDeck }
                       gotCardFromTable={ gotFromTable }
                     />

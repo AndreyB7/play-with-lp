@@ -11,6 +11,7 @@ interface Props {
   provided: any;
   snapshot: any;
   isMyTurn: boolean;
+  isRoundEnd: boolean;
   gotCardFromDeck: boolean;
   gotCardFromTable: boolean;
 }
@@ -22,6 +23,7 @@ const DraggableBlock: FC<Props> = (
     provided,
     snapshot,
     isMyTurn,
+    isRoundEnd,
     gotCardFromDeck,
     gotCardFromTable
   }
@@ -31,10 +33,13 @@ const DraggableBlock: FC<Props> = (
     let result = false;
     switch (part) {
       case 'deck':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable) || isRoundEnd;
         break;
       case 'table':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable) || isRoundEnd;
+        break;
+      case 'drop':
+        result = true;
         break;
       default:
         break;
