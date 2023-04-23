@@ -43,7 +43,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
-    drop: [],
+    drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
     playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
@@ -51,7 +51,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     setCards({
       deck: game.rounds[0].deck,
       table: game.rounds[0].table,
-      drop: [],
+      drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
@@ -80,6 +80,13 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
         case 'deck':
           removed = sourceList.pop();
           break;
+        case 'playerHand':
+          if (destination.droppableId === 'drop') {
+            removed = sourceList[source.index];
+            break;
+          }
+          removed = sourceList.splice(source.index, 1)[0];
+          break;
         default:
           removed = sourceList.splice(source.index, 1)[0];
           break;
@@ -88,7 +95,10 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
       switch (destination.droppableId) {
         case 'table':
         case 'deck':
+          destinationList.push(removed);
+          break;
         case 'drop':
+          removed.dropped = true;
           destinationList.push(removed);
           break;
         default:
@@ -141,15 +151,14 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
       case 'deck':
         return true;
       case 'drop':
-        return  false;
+        return  game.gameStatus === 'started';
       case 'table':
         if (!isMyTurn || round === undefined) {
           return true;
         }
-
         return !(gotFromDeck || gotFromTable) || pushedToTable;
-      default:
-        return game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
+      default: // 'playerHand'
+        return false; //game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
     }
   }
 

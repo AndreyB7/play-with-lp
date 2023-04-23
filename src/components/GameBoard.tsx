@@ -94,8 +94,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   return (
     <>
-      <div className='md:w-5/6'>
-        <div className='flex m-1.5 mb-2'>
+      <div className='md:w-9/12'>
+        <div className='flex m-1.5 mb-2 button-group'>
           <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
             { gameStarted ? 'Next Round' : 'Start Game' }
           </button>
@@ -108,7 +108,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
           )
         }
       </div>
-      <div className='md:w-1/6 p-1.5 flex flex-col items-start'>
+      <div className='md:w-3/12 p-1.5 flex flex-col items-start'>
         <button onClick={ () => socketGame.emit('game-reset') }
                 className='mb-2' disabled={ false }>New Game
         </button>

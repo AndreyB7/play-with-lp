@@ -5,7 +5,12 @@ type CountRoundScore = {
 const useScoreCount = (): CountRoundScore => {
   const countRoundScore = (round: Round) => {
     for (const uid in round.hands) {
-      round.score[`${ uid }`] = round.hands[`${ uid }`].reduce((sum, c) => sum + c.score, 0)
+      round.score[`${ uid }`] = round.hands[`${ uid }`].reduce((sum, c) => {
+        if (c.dropped) {
+          return sum - c.score;
+        }
+        return sum + c.score;
+      }, 0)
     }
   }
   const countGameScore = (game: Game) => {

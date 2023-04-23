@@ -28,11 +28,14 @@ const DraggableBlock: FC<Props> = (
   }
 ) => {
   const showCards = useMemo(() => {
+    if (block === 'playerHand') {
+      return cards.filter(x => !x.dropped);
+    }
     if (limit) {
       return cards.slice(-limit);
     }
     return cards;
-  }, [cards, limit]);
+  }, [block, cards, limit]);
 
   const isDragDisabled = (part: keyof iCards) => {
     let result = false;
@@ -51,21 +54,22 @@ const DraggableBlock: FC<Props> = (
 
   return (
     <div ref={ provided.innerRef }
-         className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${ snapshot.isDraggingOver ? ' someOver' : '' }` }
-         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : block === 'drop' ? '#ffffff80' : 'transparent' } }>
+         className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${snapshot.isDraggingOver ? ' someOver' : '' }` }
+         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : 'transparent' } }>
       {
-        showCards.map((card, index) => (
-          <Draggable
+        showCards.map((card, index) => {
+          return (<Draggable
             key={ card.id }
             draggableId={ card.id }
             index={ index }
             isDragDisabled={ isDragDisabled(block) }
           >
-            { (provided) => (
+            { (provided, snapshot) => (
               <div
                 ref={ provided.innerRef }
                 { ...provided.draggableProps }
                 { ...provided.dragHandleProps }
+                className={snapshot.isDragging ? 'onFly' : ''}
                 style={ {
                   display: 'inline-flex',
                   userSelect: 'none',
@@ -76,7 +80,7 @@ const DraggableBlock: FC<Props> = (
               </div>
             ) }
           </Draggable>
-        ))
+        )})
       }
       { provided.placeholder }
     </div>

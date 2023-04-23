@@ -12,8 +12,8 @@ const PlayersInfo: FC<Props> = ({ game }) => (
     <ul>{
       game.players.map(p => (
         <li key={ p.uid }>{ game.readyPlayers.includes(p.uid)
-          ? <CheckIcon style={ { color: 'lightgreen' } }/>
-          : <MinusIcon style={ { color: 'hotpink' } }/> } { p.username }
+          ? <CheckIcon style={ { color: '#00CC33' } }/>
+          : <MinusIcon style={ { color: '#FF0033' } }/> } { p.username }
         </li>))
     }</ul>
   </div>

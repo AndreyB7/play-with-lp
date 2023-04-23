@@ -169,6 +169,7 @@ export default function SocketHandler(req, res) {
       currentGame.gameStatus = 'notStarted';
       currentGame.isLastCircle = false;
       currentGame.currentHand = undefined;
+      currentGame.gameScore = {};
       socket.emit('game-reset');
       socket.broadcast.emit('game-reset');
     })
@@ -230,7 +231,7 @@ export default function SocketHandler(req, res) {
     })
 
     socket.on('check-word', (word: string) => {
-      socket.emit('checked-word', binarySearch(wordList, word));
+      socket.emit('checked-word', binarySearch(wordList, word.toLowerCase()));
     })
 
     socket.on('log-state', () => {

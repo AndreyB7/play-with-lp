@@ -15,7 +15,7 @@ const ScoreInfo: FC<Props> = ({ game }) => {
   return (
     <div className='mb-2 w-full'>
       <div className='flex text-lg font-bold'>Score:</div>
-      <div className='score-list grid auto-cols-fr grid-flow-col'>
+      <div className='score-list grid grid-flow-col'>
       { game.players.map(player => (
         <div key={ player.uid }>
           <div>{ player.username.substring(0, 3) }</div>
