@@ -4,6 +4,4 @@ services:
     build:
       context: .
     ports:
-      - "80:80"
-    environment:
-      - PASSWORD:qwerty
+      - "80:3000"
