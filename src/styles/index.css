@@ -5,6 +5,24 @@
 
 @import 'tailwindcss/utilities';
 
+:root {
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    background-color: #2f103c;
+    color: #fff;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+hr {
+    opacity: .5;
+}
+
 li svg {
     fill: currentColor;
     display: inline;
@@ -18,19 +36,58 @@ li svg {
     position: relative;
     display: flex;
     border: 1px solid transparent;
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
 
 .min-height-card > * {
     z-index: 0;
 }
-
-.table-drag-wrap.someOver > * {
+/* drag-move workarounds */
+.table-drag-wrap.someOver > *,
+.drop-drag-wrap.someOver > *{
     transform: translate(0, 0) !important;
 }
+.drop-drag-wrap .card {
+    margin-right: 0!important;
+}
+[data-rbd-placeholder-context-id] {
+    max-width: 20px !important;
+}
+.drop-drag-wrap [data-rbd-placeholder-context-id] {
+    width: 0 !important;
+}
+/**/
+.drop {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s ease;
+}
+.drop.end-round {
+    opacity: 1;
+    visibility: visible;
+}
 
-.playerHand-drag-wrap {
+.playerHand-drag-wrap,
+.opponentHand-wrap {
     overflow: hidden;
+}
+
+.drop-drag-wrap > div {
+    margin-right: -90px;
+    max-width: 112px;
+}
+
+.drop-drag-wrap:after {
+    content: '';
+    width: 112px;
+    height: 144px;
+    background: #ffffff80;
+    position: absolute;
+    top: 2px;
+    left: 1.5px;
+    border-radius: .25rem;
+    z-index: -1;
 }
 
 .deck .min-height-card > *,
@@ -39,26 +96,9 @@ li svg {
     top: 0;
 }
 
-.deck {
-    margin-right: 20px;
-}
-
 .game-wrap > * {
-    min-width: 126px;
-}
-
-:root {
-    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-    background-color: #242424;
-    color: #fff;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
+    min-width: 125px;
+    overflow: hidden;
 }
 
 button, input {
@@ -66,17 +106,27 @@ button, input {
 }
 
 button {
-    min-width: 140px;
-    margin-right: 5px;
+    max-width: 112px;
+    width: 100%;
+    font-size: .8rem;
     background: #fff;
-    padding: 5px 15px;
+    padding: 5px 10px;
     text-transform: uppercase;
     border-radius: 5px;
     transition: opacity .2s ease;
 }
 
+.button-group button {
+    width: 33%;
+    margin-right: 0.81rem;
+}
+
+.button-group button:last-child {
+    margin-right: 0;
+}
+
 button:hover {
-    opacity:.9;
+    opacity: .9;
 }
 
 button:disabled {
@@ -87,12 +137,31 @@ button:disabled {
     text-align: center;
 }
 
+.score-list > div {
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    max-width: 50px;
+}
+
+.score-list > div:last-child {
+    border: none;
+}
+
+.score-list {
+    grid-auto-columns: minmax(0, 50px);
+}
+
+
 .card {
     -webkit-user-select: none; /* Safari */
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none; /* Standard syntax */
     z-index: 1;
     position: relative;
+    transition: margin .1s ease;
+}
+
+.opponentHand .card.dropped {
+    background: gray;
 }
 
 @font-face {
@@ -106,7 +175,7 @@ button:disabled {
 }
 
 .card-center-letter {
-    font-size: 3rem;
+    font-size: 3.2rem;
     font-family: 'Celtasmigoria', serif;
     text-align: center;
     text-transform: uppercase;
@@ -147,4 +216,28 @@ button:disabled {
 .deck-part-title {
     padding-left: 1rem;
     font-weight: bold;
+}
+
+.dictionary-search {
+    position: relative;
+    line-height: 1.5em;
+    border-color: #fff;
+    max-width: 200px;
+}
+
+.dictionary-search input {
+    border-radius: 0.4rem;
+    padding: 5px 10px;
+    margin: -.5%;
+    width: 101%;
+}
+
+.dictionary-search.yep {
+    border-color: #00CC33;
+    background: #00CC33;
+}
+
+.dictionary-search.nope {
+    border-color: #FF0033;
+    background: #FF0033;
 }

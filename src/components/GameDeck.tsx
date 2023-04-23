@@ -1,32 +1,56 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { Socket } from 'socket.io';
 import DraggableBlock from '../components/DraggableBlock';
 import HandsList from "./HandsList";
 
 interface Props {
   player: Player;
   game: Game;
-  handleMove: (game: Game) => void;
+  socket: Socket;
   isMyTurn: boolean;
+  isRoundEnd: boolean;
 }
 
 export interface iCards {
   deck: Deck;
   table: Deck;
+  drop: Deck;
   playerHand: Deck;
 }
 
 const partNames = {
   deck: 'Deck',
   table: 'Discard',
+  drop: 'Subtract',
   playerHand: 'My Hand',
 }
 
-const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
+const GameDeck: FC<Props> = (
+  { game,
+    player,
+    socket,
+    isMyTurn,
+    isRoundEnd
+  }) => {
+
+  const round = useMemo(() => game.rounds[0], [game.rounds]);
+  const { gotFromDeck, gotFromTable, pushedToTable } = useMemo(() => {
+    if (round) {
+      return round.turnState;
+    }
+
+    return {
+      gotFromDeck: false,
+      gotFromTable: false,
+      pushedToTable: false,
+    }
+  }, [round]);
 
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
+    drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
     playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
@@ -34,20 +58,10 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     setCards({
       deck: game.rounds[0].deck,
       table: game.rounds[0].table,
+      drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
-
-  // todo this flags we should save to gameState
-  const [gotCardFromDeck, setGotCardFromDeck] = useState<boolean>(false);
-  const [gotCardFromTable, setGotCardFromTable] = useState<boolean>(false);
-  const [putCardToTable, setPutCardToTable] = useState<boolean>(false);
-
-  useEffect(() => {
-    setGotCardFromDeck(false);
-    setGotCardFromTable(false);
-    setPutCardToTable(false);
-  }, [isMyTurn]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {
@@ -61,7 +75,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       newList.splice(destination.index, 0, removed);
 
       setCards({ ...cards, [source.droppableId]: newList });
-      updateGame({ ...cards, [source.droppableId]: newList });
+      updateGame({ ...cards, [source.droppableId]: newList }, 'SortCards');
     }
     // Moving to a different list
     else {
@@ -73,6 +87,13 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         case 'deck':
           removed = sourceList.pop();
           break;
+        case 'playerHand':
+          if (destination.droppableId === 'drop') {
+            removed = sourceList[source.index];
+            break;
+          }
+          removed = sourceList.splice(source.index, 1)[0];
+          break;
         default:
           removed = sourceList.splice(source.index, 1)[0];
           break;
@@ -81,6 +102,10 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
       switch (destination.droppableId) {
         case 'table':
         case 'deck':
+          destinationList.push(removed);
+          break;
+        case 'drop':
+          removed.dropped = true;
           destinationList.push(removed);
           break;
         default:
@@ -94,52 +119,56 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
         [destination.droppableId]: destinationList,
       };
 
-      setCards(newCards);
-      updateGame(newCards);
-
+      let reason: GameUpdateReason;
       if (source.droppableId === 'deck') {
-        setGotCardFromDeck(true);
+        reason = 'GotCardFromDeck';
       }
       if (source.droppableId === 'table') {
-        setGotCardFromTable(true);
+        reason = 'GotCardFromTable';
       }
       if (destination.droppableId === 'table') {
-        setPutCardToTable(true);
+        reason = 'MoveCardToTable';
       }
+
+      updateGame(newCards, reason);
     }
   };
 
-  const updateGame = (cards) => {
+  const updateGame = (cards, reason: GameUpdateReason) => {
+    setCards(cards);
+
+    const sortDropped = [...cards.playerHand.filter(x => !x.dropped), ...cards.drop];
+
     game.rounds[0] = {
       ...game.rounds[0],
       deck: cards.deck,
       table: cards.table,
-      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override
+      hands: { [`${ player.uid }`]: sortDropped }, // only myHand to avoid other hands sort override
     }
-    handleMove(game);
+
+    socket.emit('game-move', game, player, reason);
   }
 
   const opponentsHands = (): { [key: string]: Deck } => {
-    const hands = {...game.rounds[0].hands};
+    const hands = { ...game.rounds[0].hands };
     delete hands[`${ player.uid }`];
     return hands;
   }
 
   const isDropDisabled = (part: keyof iCards) => {
-    let result;
     switch (part) {
       case 'deck':
-        result = true;
-        break;
+        return true;
+      case 'drop':
+        return  game.gameStatus === 'started';
       case 'table':
-        result = !isMyTurn || !(gotCardFromDeck || gotCardFromTable) || putCardToTable;
-        break;
-      default:
-        result = game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
-        break;
+        if (!isMyTurn || round === undefined) {
+          return true;
+        }
+        return !(gotFromDeck || gotFromTable) || pushedToTable;
+      default: // 'playerHand'
+        return false; //game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
     }
-
-    return result;
   }
 
   const handsList = useMemo(() => (
@@ -150,25 +179,36 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
     />
   ), [game.gameStatus, game.players])
 
+  const getCards = (cards, part) => {
+    const limit = part === 'deck' ? 2 : part === 'table' ? 2 : undefined;
+    if (part === 'playerHand') {
+      return cards[part].filter(x => !x.dropped);
+    }
+    if (limit) {
+      return cards[part].slice(-limit);
+    }
+    return cards[part];
+  }
+
   return (
     <div>
       <DragDropContext onDragEnd={ handleDragEnd }>
         <div className='game-wrap flex flex-wrap'>
           { Object.keys(cards).map((part: keyof iCards) => (
-            <div key={ part } className={ `relative ${ part } ${ part === 'playerHand' ? 'w-full' : 'min-w-max' }` }>
+            <div key={ part } className={ `relative ${isRoundEnd ? 'end-round' : ''} ${ part } ${ part === 'playerHand' ? 'w-full' : 'min-w-max' }` }>
               <h3 className='deck-part-title'>{ partNames[part] }</h3>
               <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
                 {
                   (provided, snapshot) => (
                     <DraggableBlock
                       block={ part }
-                      cards={ cards[part] }
-                      limit={ part === 'deck' ? 2 : part === 'table' ? 2 : undefined }
+                      cards={ getCards(cards, part) }
                       provided={ provided }
                       snapshot={ snapshot }
                       isMyTurn={ isMyTurn }
-                      gotCardFromDeck={ gotCardFromDeck }
-                      gotCardFromTable={ gotCardFromTable }
+                      isRoundEnd={isRoundEnd}
+                      gotCardFromDeck={ gotFromDeck }
+                      gotCardFromTable={ gotFromTable }
                     />
                   )
                 }
@@ -177,7 +217,7 @@ const GameDeck: FC<Props> = ({ game, player, handleMove, isMyTurn }) => {
           )) }
         </div>
       </DragDropContext>
-      {handsList}
+      { handsList }
     </div>
   );
 };
