@@ -1,0 +1,7 @@
+version: '3'
+services:
+  the-game:
+    build:
+      context: .
+    ports:
+      - "80:3000"
