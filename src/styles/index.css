@@ -140,12 +140,8 @@ button:disabled {
     transition: margin .1s ease;
 }
 
-.card.dropped {
-    opacity: .5;
-}
-
-.drop-drag-wrap .card.dropped {
-    opacity: 1;
+.opponentHand .card.dropped {
+    background: gray;
 }
 
 @font-face {

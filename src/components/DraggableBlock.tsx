@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import { iCards } from './GameDeck';
 import LetterCard from '../components/LetterCard';
 import { Draggable } from 'react-beautiful-dnd';
@@ -19,7 +19,6 @@ const DraggableBlock: FC<Props> = (
   {
     cards = [], // TODO empty-hand error fix, remove after in-round player join handle
     block,
-    limit = undefined,
     provided,
     snapshot,
     isMyTurn,
@@ -27,15 +26,6 @@ const DraggableBlock: FC<Props> = (
     gotCardFromTable
   }
 ) => {
-  const showCards = useMemo(() => {
-    if (block === 'playerHand') {
-      return cards.filter(x => !x.dropped);
-    }
-    if (limit) {
-      return cards.slice(-limit);
-    }
-    return cards;
-  }, [block, cards, limit]);
 
   const isDragDisabled = (part: keyof iCards) => {
     let result = false;
@@ -57,7 +47,7 @@ const DraggableBlock: FC<Props> = (
          className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${snapshot.isDraggingOver ? ' someOver' : '' }` }
          style={ { borderColor: snapshot.isDraggingOver ? '#fff' : 'transparent' } }>
       {
-        showCards.map((card, index) => {
+        cards.map((card, index) => {
           return (<Draggable
             key={ card.id }
             draggableId={ card.id }
@@ -76,7 +66,7 @@ const DraggableBlock: FC<Props> = (
                   ...provided.draggableProps.style,
                 } }
               >
-                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ showCards.length }/>
+                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ cards.length }/>
               </div>
             ) }
           </Draggable>

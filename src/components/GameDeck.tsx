@@ -170,6 +170,17 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     />
   ), [game.gameStatus, game.players])
 
+  const getCards = (cards, part) => {
+    const limit = part === 'deck' ? 2 : part === 'table' ? 2 : undefined;
+    if (part === 'playerHand') {
+      return cards[part].filter(x => !x.dropped);
+    }
+    if (limit) {
+      return cards[part].slice(-limit);
+    }
+    return cards[part];
+  }
+
   return (
     <div>
       <DragDropContext onDragEnd={ handleDragEnd }>
@@ -182,8 +193,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
                   (provided, snapshot) => (
                     <DraggableBlock
                       block={ part }
-                      cards={ cards[part] }
-                      limit={ part === 'deck' ? 2 : part === 'table' ? 2 : undefined }
+                      cards={ getCards(cards, part) }
                       provided={ provided }
                       snapshot={ snapshot }
                       isMyTurn={ isMyTurn }

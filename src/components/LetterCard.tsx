@@ -14,7 +14,7 @@ const LetterCard: FC<Props> = ({ card, isOpen, cardCount }) => {
   }
   return (
     <div style={ { marginRight: `${ cardCount > 3 ? -31 : 11 }px` } }
-         className={ `card flex flex-col justify-between h-36 w-28 bg-white rounded text-black shadow-sm shadow-black m-0.5 ${
+         className={ `card flex flex-col justify-between h-36 w-28 bg-white rounded text-black shadow-xl shadow-black m-0.5 ${
            isOpen ? 'open' : 'close' } ${
            card.dropped ? 'dropped' : ''
          }` }>

@@ -98,6 +98,12 @@ export default function SocketHandler(req, res) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
+      // first count scoring
+      if (currentGame.gameStatus === 'endRound' || currentGame.gameStatus === 'finished') {
+        countRoundScore(currentGame.rounds[0]);
+        countGameScore(currentGame);
+      }
+
       gameUpdate(currentGame);
     }
 
@@ -195,7 +201,7 @@ export default function SocketHandler(req, res) {
         turnState: newTurnState
       };
 
-      // add scoring
+      // update count scoring
       if (currentGame.gameStatus === 'endRound' || currentGame.gameStatus === 'finished') {
         countRoundScore(currentGame.rounds[0]);
         countGameScore(currentGame);
