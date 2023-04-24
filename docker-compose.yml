@@ -8,10 +8,12 @@ services:
       - ./.env:/app/.env
 
   nginx:
-    image: erangaeb/senznginx:0.4
-    container_name: nginx
+    image: nginx
     ports:
       - 80:80
       - 443:443
+    volumes:
+      - /etc/letsencrypt/live/quiddlerqueen.com:/etc/nginx/certs
+      - ./sites-enabled:/etc/nginx/sites-enabled
     links:
       - web
