@@ -22,6 +22,7 @@ type Round = {
   table: Deck;
   deck: Deck;
   score: { [uid: UID]: number }
+  extraScoreAdded: UID;
   croupier: UID;
   turnState: {
     gotFromDeck: boolean;
@@ -43,4 +44,4 @@ type Game = {
   gameStatus: 'notStarted' | 'started' | 'endRound' | 'lastRound' | 'finished';
 }
 
-type GameUpdateReason = 'GotCardFromTable' | 'GotCardFromDeck' | 'MoveCardToTable' | 'SortCards';
+type GameUpdateReason = 'GotCardFromTable' | 'GotCardFromDeck' | 'MoveCardToTable' | 'SortCards' | 'AddRoundExtraScore';

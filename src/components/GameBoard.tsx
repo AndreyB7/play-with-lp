@@ -67,8 +67,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return false;
   }, [isRoundStarted, game]);
 
-  const showScore = () => {
-    return true
+  const addExtraScore = (uid: UID) => {
+    socketGame.emit('add-extra-score', uid);
   }
 
   const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [game]);
@@ -100,11 +100,11 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     <>
       <div className='md:w-9/12'>
         <div className='flex m-1.5 mb-2 button-group'>
-          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
+          <button className='main' onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
             { gameStarted ? 'Next Round' : 'Start Game' }
           </button>
-          <button onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
-          <button onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
+          <button className='main' onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
+          <button className='main' onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
         </div>
         {
           game.rounds.length > 0 && (
@@ -113,15 +113,15 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         }
       </div>
       <div className='md:w-3/12 p-1.5 flex flex-col items-start'>
-        <button onClick={ () => socketGame.emit('game-reset') }
-                className='mb-2' disabled={ false }>New Game
-        </button>
         { gameStarted && <RoundInfo game={ game }/> }
-        <PlayersInfo game={ game }/>
-        { showScore && <ScoreInfo game={ game }/> }
+        <PlayersInfo game={ game } player={player} canIStarNewRound={canIStarNewRound} addExtraScore={addExtraScore}/>
+        <ScoreInfo game={ game }/>
         <Dictionary socket={ socketGame }/>
         <button onClick={ () => socketGame.emit('log-state') }
-                className='mt-2 mt-auto hidden' disabled={ false }>Log
+                className='mt-2 mt-auto hidden main' disabled={ false }>Log
+        </button>
+        <button onClick={ () => socketGame.emit('game-reset') }
+                className='mb-2 mw-200 main' disabled={ false }>End / New Game
         </button>
       </div>
     </>

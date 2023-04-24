@@ -175,6 +175,16 @@ export default function SocketHandler(req, res) {
       socket.broadcast.emit('game-reset');
     })
 
+    socket.on('add-extra-score', (uid: UID) => {
+      if (!currentGame.rounds[0].score[`${ uid }`]) {
+        return
+      }
+      currentGame.rounds[0].score[`${ uid }`] = currentGame.rounds[0].score[`${ uid }`] + 10;
+      countGameScore(currentGame);
+      currentGame.rounds[0].extraScoreAdded = uid;
+      gameUpdate(currentGame);
+    });
+
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
     socket.on('game-move', (newGame: Game, player: Player, reason: GameUpdateReason) => {
       const newTurnState = { ...currentGame.rounds[0].turnState };
