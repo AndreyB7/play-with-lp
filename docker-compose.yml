@@ -1,7 +1,17 @@
 version: '3'
 services:
-  the-game:
-    build:
-      context: .
+  web:
+    image: game-ui
     ports:
-      - "80:3000"
+      - 3000:3000
+    volumes:
+      - ./.env:/app/.env
+
+  nginx:
+    image: erangaeb/senznginx:0.4
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - web
