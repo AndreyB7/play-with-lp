@@ -34,10 +34,10 @@ const Dictionary: FC<Props> = ({ socket }) => {
   }
 
   return (
-    <div className='mb-2 w-full'>
+    <div className='mb-28 w-full'>
       <div className='flex text-lg font-bold'>Dictionary:</div>
       <div className={
-        `dictionary-search rounded-md border-2 overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
+        `dictionary-search mw-200 rounded-md border-2 overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
         }` }>
         <input
           type="text"

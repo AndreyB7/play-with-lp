@@ -18,6 +18,7 @@ export const initNewRound = (game: Game, player: Player): Round => {
     table: [],
     score: {},
     croupier: player.uid,
+    extraScoreAdded: false,
     turnState: {
       gotFromDeck: false,
       gotFromTable: false,

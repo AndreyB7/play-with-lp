@@ -7,7 +7,9 @@ const useScoreCount = (): CountRoundScore => {
     for (const uid in round.hands) {
       round.score[`${ uid }`] = round.hands[`${ uid }`].reduce((sum, c) => {
         if (c.dropped) {
-          return sum - c.score;
+          sum = sum - c.score;
+          if (sum < 0) {sum = 0}
+          return sum;
         }
         return sum + c.score;
       }, 0)
