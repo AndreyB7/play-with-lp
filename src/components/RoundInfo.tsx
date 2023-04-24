@@ -26,7 +26,7 @@ const RoundInfo: FC<Props> = ({ game }) => {
         ? statusDict.get(game.gameStatus)
         : (`${ getWinnerName(game) } Wins!` ?? 'Draw!') }
       </div>
-      <div>Round (Cards { currentRoundCardNumber })</div>
+      <div>Round (# of Cards): { currentRoundCardNumber })</div>
       <div>Dealer: { croupierName }</div>
     </div>
   );

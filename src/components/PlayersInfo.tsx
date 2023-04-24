@@ -1,6 +1,6 @@
 import CheckIcon from "./svg/check.svg";
 import MinusIcon from "./svg/minus.svg";
-import PlusIcon from "./svg/plus.svg";
+import Plus10Icon from "./svg/plus10.svg";
 import React, { FC } from "react";
 
 interface Props {
@@ -31,7 +31,7 @@ const PlayersInfo: FC<Props> = ({ game, player,canIStarNewRound, addExtraScore }
             { game.playerHasWord === p.uid && <div style={{marginLeft:5}}>  Has Word!</div> }
             { canAddExtraScore &&
               <button className='score-plus' data-uid={ p.uid } onClick={ handleAddScore }>
-                <PlusIcon style={ { color: '#fff' } }/>
+                <Plus10Icon className='plus10' style={ { color: '#fff' } }/>
               </button> }
           </li>))
       }</ul>
