@@ -98,7 +98,7 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   return (
     <>
-      <div className='md:w-9/12'>
+      <div className='md:w-9/12 md:p-1.5'>
         <div className='flex m-1.5 mb-2 button-group'>
           <button className='main' onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
             { gameStarted ? 'Next Round' : 'Start Game' }

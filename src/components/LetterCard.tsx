@@ -13,7 +13,7 @@ const LetterCard: FC<Props> = ({ card, isOpen, cardCount }) => {
     smallest: `${ largeLetters.includes(card.label) ? ' card-center-letter--smallest' : '' }`,
   }
   return (
-    <div style={ { marginRight: `${ cardCount > 3 ? -31 : 11 }px` } }
+    <div style={ { marginRight: `${ cardCount > 3 ? -50 : 11 }px` } }
          className={ `card flex flex-col justify-between h-36 w-28 bg-white rounded text-black shadow-xl shadow-black m-0.5 ${
            isOpen ? 'open' : 'close' } ${
            card.dropped ? 'dropped' : ''

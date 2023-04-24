@@ -195,7 +195,13 @@ const GameDeck: FC<Props> = (
       <DragDropContext onDragEnd={ handleDragEnd }>
         <div className='game-wrap flex flex-wrap'>
           { Object.keys(cards).map((part: keyof iCards) => (
-            <div key={ part } className={ `relative ${isRoundEnd ? 'end-round' : ''} ${ part } ${ part === 'playerHand' ? 'w-full' : 'min-w-max' }` }>
+            <div key={ part } className={
+               `relative ${
+                 isRoundEnd && 'end-round' } ${
+                part } ${
+                isMyTurn && 'my-turn'} ${
+                part === 'playerHand' ? 'w-full' : 'min-w-max' }`
+            }>
               <h3 className='deck-part-title'>{ partNames[part] }</h3>
               <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
                 {
