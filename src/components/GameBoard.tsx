@@ -113,15 +113,15 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
         }
       </div>
       <div className='md:w-3/12 p-1.5 flex flex-col items-start'>
-        <button onClick={ () => socketGame.emit('game-reset') }
-                className='mb-2 mw-200 main' disabled={ false }>End / New Game
-        </button>
         { gameStarted && <RoundInfo game={ game }/> }
-        <PlayersInfo game={ game } player={player} addExtraScore={addExtraScore}/>
+        <PlayersInfo game={ game } player={player} canIStarNewRound={canIStarNewRound} addExtraScore={addExtraScore}/>
         <ScoreInfo game={ game }/>
         <Dictionary socket={ socketGame }/>
         <button onClick={ () => socketGame.emit('log-state') }
                 className='mt-2 mt-auto hidden main' disabled={ false }>Log
+        </button>
+        <button onClick={ () => socketGame.emit('game-reset') }
+                className='mb-2 mw-200 main' disabled={ false }>End / New Game
         </button>
       </div>
     </>

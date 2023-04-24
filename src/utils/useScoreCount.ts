@@ -13,6 +13,10 @@ const useScoreCount = (): CountRoundScore => {
         }
         return sum + c.score;
       }, 0)
+      // in case bonus scores was added
+      if (round.extraScoreAdded === uid) {
+        round.score[`${ uid }`] = round.score[`${ uid }`] + 10;
+      }
     }
   }
   const countGameScore = (game: Game) => {

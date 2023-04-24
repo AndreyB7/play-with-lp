@@ -1,4 +1,5 @@
 import React, { FC, memo, useMemo } from 'react';
+import { getWinnerName } from "../utils/gameHelpers";
 
 interface Props {
   game: Game;
@@ -21,7 +22,10 @@ const RoundInfo: FC<Props> = ({ game }) => {
 
   return (
     <div className='mb-2 w-full'>
-      <div>Status: { statusDict.get(game.gameStatus) }</div>
+      <div className='capitalize'>Status: { game.gameStatus !== 'finished'
+        ? statusDict.get(game.gameStatus)
+        : (`${ getWinnerName(game) } Wins!` ?? 'Draw!') }
+      </div>
       <div>Round (Cards { currentRoundCardNumber })</div>
       <div>Dealer: { croupierName }</div>
     </div>

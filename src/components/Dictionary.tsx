@@ -34,7 +34,7 @@ const Dictionary: FC<Props> = ({ socket }) => {
   }
 
   return (
-    <div className='mb-28 w-full'>
+    <div className='w-full' style={ { marginBottom: isWord !== undefined ? 76 : 100 } }>
       <div className='flex text-lg font-bold'>Dictionary:</div>
       <div className={
         `dictionary-search mw-200 rounded-md border-2 overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
@@ -50,6 +50,8 @@ const Dictionary: FC<Props> = ({ socket }) => {
         />
         { isWord !== undefined && <div className='text-center font-bold'>{ isWord ? 'Yep!' : 'Nope!' }</div> }
       </div>
+      { isWord && <a className='wiki-link mw-200' href={ `https://en.wikipedia.org/wiki/${ search }` } target='_blank'>Check Wiki</a>
+      }
     </div>
   )
 }

@@ -6,14 +6,12 @@ import React, { FC } from "react";
 interface Props {
   game: Game;
   player: Player;
+  canIStarNewRound: boolean;
   addExtraScore: (uid: UID) => void
 }
 
-const PlayersInfo: FC<Props> = ({ game, player, addExtraScore }) => {
-  const canAddExtraScore =
-    !!game.rounds.length && !game.rounds[0]?.extraScoreAdded
-    && player.uid === game.rounds[0]?.croupier
-    && (game.gameStatus === 'endRound' || game.gameStatus === 'finished');
+const PlayersInfo: FC<Props> = ({ game, player,canIStarNewRound, addExtraScore }) => {
+  const canAddExtraScore = canIStarNewRound && game.gameStatus !== 'notStarted';
   const handleAddScore = (e) => {
     e.currentTarget.disabled = true;
     addExtraScore(e.currentTarget.dataset.uid);

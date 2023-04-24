@@ -181,7 +181,7 @@ export default function SocketHandler(req, res) {
       }
       currentGame.rounds[0].score[`${ uid }`] = currentGame.rounds[0].score[`${ uid }`] + 10;
       countGameScore(currentGame);
-      currentGame.rounds[0].extraScoreAdded = true;
+      currentGame.rounds[0].extraScoreAdded = uid;
       gameUpdate(currentGame);
     });
 

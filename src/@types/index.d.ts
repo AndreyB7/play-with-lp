@@ -22,7 +22,7 @@ type Round = {
   table: Deck;
   deck: Deck;
   score: { [uid: UID]: number }
-  extraScoreAdded: boolean;
+  extraScoreAdded: UID;
   croupier: UID;
   turnState: {
     gotFromDeck: boolean;
