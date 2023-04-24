@@ -98,6 +98,7 @@ export default function SocketHandler(req, res) {
         currentGame.gameStatus = currentGame.gameStatus === 'lastRound' ? 'finished' : 'endRound';
       }
 
+      // first count scoring
       if (currentGame.gameStatus === 'endRound' || currentGame.gameStatus === 'finished') {
         countRoundScore(currentGame.rounds[0]);
         countGameScore(currentGame);
@@ -169,9 +170,20 @@ export default function SocketHandler(req, res) {
       currentGame.gameStatus = 'notStarted';
       currentGame.isLastCircle = false;
       currentGame.currentHand = undefined;
+      currentGame.gameScore = {};
       socket.emit('game-reset');
       socket.broadcast.emit('game-reset');
     })
+
+    socket.on('add-extra-score', (uid: UID) => {
+      if (!currentGame.rounds[0].score[`${ uid }`]) {
+        return
+      }
+      currentGame.rounds[0].score[`${ uid }`] = currentGame.rounds[0].score[`${ uid }`] + 10;
+      countGameScore(currentGame);
+      currentGame.rounds[0].extraScoreAdded = uid;
+      gameUpdate(currentGame);
+    });
 
     // Todo Let's think about make different event with "I'v got card form table", "I'v pushed card to table"...
     socket.on('game-move', (newGame: Game, player: Player, reason: GameUpdateReason) => {
@@ -198,6 +210,12 @@ export default function SocketHandler(req, res) {
         },
         turnState: newTurnState
       };
+
+      // update count scoring
+      if (currentGame.gameStatus === 'endRound' || currentGame.gameStatus === 'finished') {
+        countRoundScore(currentGame.rounds[0]);
+        countGameScore(currentGame);
+      }
 
       gameUpdate(currentGame);
     })
@@ -230,7 +248,7 @@ export default function SocketHandler(req, res) {
     })
 
     socket.on('check-word', (word: string) => {
-      socket.emit('checked-word', binarySearch(wordList, word));
+      socket.emit('checked-word', binarySearch(wordList, word.toLowerCase()));
     })
 
     socket.on('log-state', () => {

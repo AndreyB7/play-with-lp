@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import { iCards } from './GameDeck';
 import LetterCard from '../components/LetterCard';
 import { Draggable } from 'react-beautiful-dnd';
@@ -11,6 +11,7 @@ interface Props {
   provided: any;
   snapshot: any;
   isMyTurn: boolean;
+  isRoundEnd: boolean;
   gotCardFromDeck: boolean;
   gotCardFromTable: boolean;
 }
@@ -19,29 +20,26 @@ const DraggableBlock: FC<Props> = (
   {
     cards = [], // TODO empty-hand error fix, remove after in-round player join handle
     block,
-    limit = undefined,
     provided,
     snapshot,
     isMyTurn,
+    isRoundEnd,
     gotCardFromDeck,
     gotCardFromTable
   }
 ) => {
-  const showCards = useMemo(() => {
-    if (limit) {
-      return cards.slice(-limit);
-    }
-    return cards;
-  }, [cards, limit]);
 
   const isDragDisabled = (part: keyof iCards) => {
     let result = false;
     switch (part) {
       case 'deck':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable) || isRoundEnd;
         break;
       case 'table':
-        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable);
+        result = !isMyTurn || (gotCardFromDeck || gotCardFromTable) || isRoundEnd;
+        break;
+      case 'drop':
+        result = true;
         break;
       default:
         break;
@@ -51,32 +49,33 @@ const DraggableBlock: FC<Props> = (
 
   return (
     <div ref={ provided.innerRef }
-         className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${ snapshot.isDraggingOver ? ' someOver' : '' }` }
-         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : block === 'drop' ? '#ffffff80' : 'transparent' } }>
+         className={ `min-height-card m-1 flex flex-wrap ${ block }-drag-wrap${snapshot.isDraggingOver ? ' someOver' : '' }` }
+         style={ { borderColor: snapshot.isDraggingOver ? '#fff' : 'transparent' } }>
       {
-        showCards.map((card, index) => (
-          <Draggable
+        cards.map((card, index) => {
+          return (<Draggable
             key={ card.id }
             draggableId={ card.id }
             index={ index }
             isDragDisabled={ isDragDisabled(block) }
           >
-            { (provided) => (
+            { (provided, snapshot) => (
               <div
                 ref={ provided.innerRef }
                 { ...provided.draggableProps }
                 { ...provided.dragHandleProps }
+                className={snapshot.isDragging ? 'onFly' : ''}
                 style={ {
                   display: 'inline-flex',
                   userSelect: 'none',
                   ...provided.draggableProps.style,
                 } }
               >
-                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ showCards.length }/>
+                <LetterCard key={ card.id } isOpen={ block !== 'deck' } card={ card } cardCount={ cards.length }/>
               </div>
             ) }
           </Draggable>
-        ))
+        )})
       }
       { provided.placeholder }
     </div>

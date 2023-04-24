@@ -33,23 +33,30 @@ const Dictionary: FC<Props> = ({ socket }) => {
     socket.emit('check-word', search);
   }
 
+  const handleCheckWord = () => {
+    window.open(`https://scrabble.merriam.com/finder/${ search }`, "_blank");
+  }
+
   return (
-    <div className='mb-2 w-full'>
+    <div className='w-full' style={ { marginBottom: isWord !== undefined ? 76 : 100 } }>
       <div className='flex text-lg font-bold'>Dictionary:</div>
       <div className={
-        `dictionary-search rounded-md outline overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
+        `dictionary-search mw-200 rounded-md border-2 overflow-hidden ${ isWord !== undefined && (isWord ? 'yep' : 'nope')
         }` }>
         <input
           type="text"
           placeholder="Check word..."
           value={ search }
-          className="outline-none rounded-md p-1.5 w-full"
+          className="outline-none p-1.5 w-full"
           onChange={ handleChange }
           onBlur={ checkWord }
           onKeyPress={ handleKeyPress }
         />
         { isWord !== undefined && <div className='text-center font-bold'>{ isWord ? 'Yep!' : 'Nope!' }</div> }
       </div>
+      { isWord
+        && <button className='wiki-link main mw-200' onClick={ handleCheckWord }>Look Up</button>
+      }
     </div>
   )
 }

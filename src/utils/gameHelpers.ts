@@ -18,6 +18,7 @@ export const initNewRound = (game: Game, player: Player): Round => {
     table: [],
     score: {},
     croupier: player.uid,
+    extraScoreAdded: '',
     turnState: {
       gotFromDeck: false,
       gotFromTable: false,
@@ -41,4 +42,16 @@ export const initNewRound = (game: Game, player: Player): Round => {
   round.table.push(round.deck.pop());
 
   return round;
+}
+
+export const getWinnerName = (game: Game): UID => {
+  let max = -1;
+  let uid;
+  Object.keys(game.gameScore).forEach(function ( k) {
+    if (max < +game.gameScore[`${k}`]) {
+      max = +game.gameScore[`${k}`];
+      uid = k;
+    }
+  });
+  return game.players.find(x => x.uid === uid)?.username;
 }

@@ -33,6 +33,10 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return game.rounds.length > 0;
   }, [game.rounds]);
 
+  const isRoundEnd = useMemo(() => {
+    return (game.gameStatus === 'endRound' || game.gameStatus === 'finished')
+  }, [game.gameStatus]);
+
   const isMyTurn = useMemo(() => {
     return game.currentHand === player.uid;
   }, [game, player]);
@@ -63,8 +67,8 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
     return false;
   }, [isRoundStarted, game]);
 
-  const showScore = () => {
-    return true
+  const addExtraScore = (uid: UID) => {
+    socketGame.emit('add-extra-score', uid);
   }
 
   const gameStarted = useMemo(() => game.gameStatus !== 'notStarted', [game]);
@@ -94,30 +98,30 @@ const GameBoard: FC<Props> = ({ game, socketGame, player }) => {
 
   return (
     <>
-      <div className='md:w-5/6'>
-        <div className='flex m-1.5 mb-2'>
-          <button onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
+      <div className='md:w-9/12 md:p-1.5'>
+        <div className='flex m-1.5 mb-2 button-group'>
+          <button className='main' onClick={ handleClickNextRound } disabled={ !canIStarNewRound || !isAllReady }>
             { gameStarted ? 'Next Round' : 'Start Game' }
           </button>
-          <button onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
-          <button onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
+          <button className='main' onClick={ onEndTurn } disabled={ !canIEndTurn }>End Turn</button>
+          <button className='main' onClick={ onHasWord } disabled={ !canISayWord }>I has word</button>
         </div>
         {
           game.rounds.length > 0 && (
-            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } socket={ socketGame }/>
+            <GameDeck game={ game } player={ player } isMyTurn={ isMyTurn } isRoundEnd={isRoundEnd} socket={ socketGame }/>
           )
         }
       </div>
-      <div className='md:w-1/6 p-1.5 flex flex-col items-start'>
-        <button onClick={ () => socketGame.emit('game-reset') }
-                className='mb-2' disabled={ false }>New Game
-        </button>
+      <div className='md:w-3/12 p-1.5 flex flex-col items-start'>
         { gameStarted && <RoundInfo game={ game }/> }
-        <PlayersInfo game={ game }/>
-        { showScore && <ScoreInfo game={ game }/> }
+        <PlayersInfo game={ game } player={player} canIStarNewRound={canIStarNewRound} addExtraScore={addExtraScore}/>
+        <ScoreInfo game={ game }/>
         <Dictionary socket={ socketGame }/>
         <button onClick={ () => socketGame.emit('log-state') }
-                className='mt-2 mt-auto hidden' disabled={ false }>Log
+                className='mt-2 mt-auto hidden main' disabled={ false }>Log
+        </button>
+        <button onClick={ () => socketGame.emit('game-reset') }
+                className='mb-2 mw-200 main' disabled={ false }>End / New Game
         </button>
       </div>
     </>

@@ -9,6 +9,7 @@ interface Props {
   game: Game;
   socket: Socket;
   isMyTurn: boolean;
+  isRoundEnd: boolean;
 }
 
 export interface iCards {
@@ -25,7 +26,13 @@ const partNames = {
   playerHand: 'My Hand',
 }
 
-const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
+const GameDeck: FC<Props> = (
+  { game,
+    player,
+    socket,
+    isMyTurn,
+    isRoundEnd
+  }) => {
 
   const round = useMemo(() => game.rounds[0], [game.rounds]);
   const { gotFromDeck, gotFromTable, pushedToTable } = useMemo(() => {
@@ -43,7 +50,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
   const [cards, setCards] = useState<iCards>({
     deck: game.rounds[0].deck,
     table: game.rounds[0].table,
-    drop: [],
+    drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
     playerHand: game.rounds[0].hands[`${ player.uid }`],
   });
 
@@ -51,7 +58,7 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     setCards({
       deck: game.rounds[0].deck,
       table: game.rounds[0].table,
-      drop: [],
+      drop: game.rounds[0].hands[`${ player.uid }`].filter(x => x.dropped),
       playerHand: game.rounds[0].hands[`${ player.uid }`]
     })
   }, [game])
@@ -80,6 +87,13 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
         case 'deck':
           removed = sourceList.pop();
           break;
+        case 'playerHand':
+          if (destination.droppableId === 'drop') {
+            removed = sourceList[source.index];
+            break;
+          }
+          removed = sourceList.splice(source.index, 1)[0];
+          break;
         default:
           removed = sourceList.splice(source.index, 1)[0];
           break;
@@ -88,7 +102,10 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
       switch (destination.droppableId) {
         case 'table':
         case 'deck':
+          destinationList.push(removed);
+          break;
         case 'drop':
+          removed.dropped = true;
           destinationList.push(removed);
           break;
         default:
@@ -120,11 +137,13 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
   const updateGame = (cards, reason: GameUpdateReason) => {
     setCards(cards);
 
+    const sortDropped = [...cards.playerHand.filter(x => !x.dropped), ...cards.drop];
+
     game.rounds[0] = {
       ...game.rounds[0],
       deck: cards.deck,
       table: cards.table,
-      hands: { [`${ player.uid }`]: cards.playerHand }, // only myHand to avoid other hands sort override
+      hands: { [`${ player.uid }`]: sortDropped }, // only myHand to avoid other hands sort override
     }
 
     socket.emit('game-move', game, player, reason);
@@ -141,15 +160,14 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
       case 'deck':
         return true;
       case 'drop':
-        return  false;
+        return  game.gameStatus === 'started';
       case 'table':
         if (!isMyTurn || round === undefined) {
           return true;
         }
-
         return !(gotFromDeck || gotFromTable) || pushedToTable;
-      default:
-        return game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
+      default: // 'playerHand'
+        return false; //game.gameStatus !== 'started' && game.gameStatus !== 'lastRound';
     }
   }
 
@@ -161,23 +179,40 @@ const GameDeck: FC<Props> = ({ game, player, socket, isMyTurn }) => {
     />
   ), [game.gameStatus, game.players])
 
+  const getCards = (cards, part) => {
+    const limit = part === 'deck' ? 2 : part === 'table' ? 2 : undefined;
+    if (part === 'playerHand') {
+      return cards[part].filter(x => !x.dropped);
+    }
+    if (limit) {
+      return cards[part].slice(-limit);
+    }
+    return cards[part];
+  }
+
   return (
     <div>
       <DragDropContext onDragEnd={ handleDragEnd }>
         <div className='game-wrap flex flex-wrap'>
           { Object.keys(cards).map((part: keyof iCards) => (
-            <div key={ part } className={ `relative ${ part } ${ part === 'playerHand' ? 'w-full' : 'min-w-max' }` }>
+            <div key={ part } className={
+               `relative ${
+                 isRoundEnd && 'end-round' } ${
+                part } ${
+                isMyTurn && 'my-turn'} ${
+                part === 'playerHand' ? 'w-full' : 'min-w-max' }`
+            }>
               <h3 className='deck-part-title'>{ partNames[part] }</h3>
               <Droppable droppableId={ part } direction="horizontal" isDropDisabled={ isDropDisabled(part) }>
                 {
                   (provided, snapshot) => (
                     <DraggableBlock
                       block={ part }
-                      cards={ cards[part] }
-                      limit={ part === 'deck' ? 2 : part === 'table' ? 2 : undefined }
+                      cards={ getCards(cards, part) }
                       provided={ provided }
                       snapshot={ snapshot }
                       isMyTurn={ isMyTurn }
+                      isRoundEnd={isRoundEnd}
                       gotCardFromDeck={ gotFromDeck }
                       gotCardFromTable={ gotFromTable }
                     />
