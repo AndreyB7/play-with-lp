@@ -101,6 +101,7 @@ hr {
 .game-wrap > * {
     min-width: 125px;
     overflow: hidden;
+    max-width: 768px;
 }
 
 button.main, input {
@@ -221,6 +222,7 @@ button:disabled {
 .deck-part-title {
     padding-left: 1rem;
     font-weight: bold;
+    margin-top: .25rem;
 }
 
 .dictionary-search {
