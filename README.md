@@ -51,16 +51,18 @@ server {
 
     server_name domain.com www.domain.com;
 
-    listen 443 ssl; # managed by Certbot
+    # listen 443 ssl; # managed by Certbot
     
     # RSA certificate
-    ssl_certificate /etc/letsencrypt/live/domain.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/domain.com/privkey.pem; # managed by Certbot
+    # ssl_certificate /etc/letsencrypt/live/domain.com/fullchain.pem; # managed by Certbot
+    # ssl_certificate_key /etc/letsencrypt/live/domain.com/privkey.pem; # managed by Certbot
     
-    # http to https redirect
-    if ($scheme != "https") {
-        return 301 https://$host$request_uri;
-    }
+    # http to https redirect by Certbot
+    # if ($scheme != "https") {
+    #    return 301 https://$host$request_uri;
+    # }
+    
+    # include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     
     # proxy domain.com to local server
     location / {
@@ -86,3 +88,5 @@ sudo systemctl restart nginx
 sudo systemctl restart nginx
 systemctl status nginx
 ```
+### Certbot SSL setup
+https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/
