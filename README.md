@@ -11,8 +11,8 @@ $ echo 'PASSWORD=password' > .env
 $ sudo docker compose up -d
 ```
 
-### Run on VM
-0. Git
+### Run on cloud VM
+0. Pull project and add .env
 ```shell
 git clone github-repo-url
 git pull
@@ -22,9 +22,10 @@ git pull
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
-2. Install deps and build 
+2. Install deps add .env and build 
 ```shell
 cd /project-root-folder
+echo 'PASSWORD=password' > .env
 npm install
 npm run build
 ```
