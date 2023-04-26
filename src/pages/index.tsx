@@ -39,6 +39,7 @@ export default function Home() {
           height='300'
           src="/QQ-logo-sign-in@2x.png"
           unoptimized
+          priority
         />
         <div className='text mw-5 mb-6'>
           <p>Welcome to Quiddler Queen! The ONLY way to play quiddler online with friends or loved ones.</p>
