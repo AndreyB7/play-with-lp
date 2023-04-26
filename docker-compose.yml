@@ -1,7 +1,17 @@
 version: '3'
 services:
-  the-game:
-    build:
-      context: .
+  game-app:
+    image: game-app
+    volumes:
+      - ./:/app
+
+  nginx:
+    image: nginx
     ports:
-      - "80:3000"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./configs/site.conf:/etc/nginx/sites-enabled/site.conf
+      - ./certs:/etc/nginx/certs
+    links:
+      - game-app
