@@ -1,11 +1,9 @@
 version: '3'
 services:
-  web:
-    image: game-ui
-    ports:
-      - "3000:3000"
+  game-app:
+    image: game-app
     volumes:
-      - ./.env:/app/.env
+      - ./:/app
 
   nginx:
     image: nginx
@@ -13,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/letsencrypt/live/quiddlerqueen.com:/etc/nginx/certs
-      - ./sites-enabled:/etc/nginx/sites-enabled
+      - ./configs/site.conf:/etc/nginx/sites-enabled/site.conf
+      - ./certs:/etc/nginx/certs
     links:
-      - web
+      - game-app

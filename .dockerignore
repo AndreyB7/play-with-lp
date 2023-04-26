@@ -1,0 +1,6 @@
+.next
+docker
+node_modules
+
+.gitignore
+Makefile
