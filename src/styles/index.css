@@ -101,6 +101,7 @@ hr {
 .game-wrap > * {
     min-width: 125px;
     overflow: hidden;
+    max-width: 768px;
 }
 
 button.main, input {
@@ -166,16 +167,6 @@ button:disabled {
     background: #97889e;
 }
 
-@font-face {
-    font-family: 'Celtasmigoria';
-    src: url(../assets/Celtasmigoria.ttf);
-}
-
-@font-face {
-    font-family: 'Censcbk';
-    src: url(../assets/CENSCBK.TTF);
-}
-
 .card-center-letter {
     font-size: 3.2rem;
     font-family: 'Celtasmigoria', serif;
@@ -221,6 +212,7 @@ button:disabled {
 .deck-part-title {
     padding-left: 1rem;
     font-weight: bold;
+    margin-top: .25rem;
 }
 
 .dictionary-search {
