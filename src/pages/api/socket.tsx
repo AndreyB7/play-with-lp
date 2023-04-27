@@ -34,8 +34,6 @@ export default function SocketHandler(req, res) {
   const io = new Server(res.socket.server);
   res.socket.server.io = io;
 
-  const { countRoundScore, countGameScore } = useScoreCount();
-
   const onConnection = (socket) => {
 
     socket.on('access', (passkey: string) => {
@@ -77,6 +75,7 @@ export default function SocketHandler(req, res) {
       }
     })
 
+    const { countRoundScore, countGameScore } = useScoreCount();
     const gameUpdate = (newGameState: Game) => {
       socket.emit('update-game', newGameState);
       socket.broadcast.emit('update-game', newGameState);
