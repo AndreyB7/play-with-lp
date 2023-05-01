@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Socket } from "socket.io";
+import { Socket } from "socket.io-client";
 
 interface Props {
   socket: Socket

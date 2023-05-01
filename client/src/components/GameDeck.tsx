@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { Socket } from 'socket.io';
+import { Socket } from 'socket.io-client';
 import DraggableBlock from '../components/DraggableBlock';
 import HandsList from "./HandsList";
 

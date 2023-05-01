@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import { Socket } from 'socket.io';
+import { Socket } from 'socket.io-client';
 import RoundInfo from '../components/RoundInfo';
 import GameDeck from '../components/GameDeck';
 import ScoreInfo from "./ScoreInfo";
