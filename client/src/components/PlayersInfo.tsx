@@ -10,7 +10,7 @@ interface Props {
   addExtraScore: (uid: UID) => void
 }
 
-const PlayersInfo: FC<Props> = ({ game, player,canIStarNewRound, addExtraScore }) => {
+const PlayersInfo: FC<Props> = ({ game, canIStarNewRound, addExtraScore }) => {
   const canAddExtraScore = canIStarNewRound && game.gameStatus !== 'notStarted';
   const handleAddScore = (e) => {
     e.currentTarget.disabled = true;

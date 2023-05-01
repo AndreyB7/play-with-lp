@@ -50,7 +50,7 @@ const Dictionary: FC<Props> = ({ socket }) => {
           className="outline-none p-1.5 w-full"
           onChange={ handleChange }
           onBlur={ checkWord }
-          onKeyPress={ handleKeyPress }
+          onKeyDownCapture={ handleKeyPress }
         />
         { isWord !== undefined && <div className='text-center font-bold'>{ isWord ? 'Yep!' : 'Nope!' }</div> }
       </div>
