@@ -1,9 +1,9 @@
-import { findNextPlayer, initNewRound } from '../../client/src/utils/gameHelpers';
+import { findNextPlayer, initNewRound } from '../utils/gameHelpers';
 import { v4 as uuidv4 } from 'uuid';
 import {Socket} from "socket.io";
-import useScoreCount from "../../client/src/utils/useScoreCount";
-import wordList from "./utils/scrabble_word_list.json";
-import binarySearch from "./utils/binarySearch";
+import useScoreCount from "../utils/useScoreCount";
+import wordList from "../utils/scrabble_word_list.json";
+import binarySearch from "../utils/binarySearch";
 
 export const initGame: Game = {
   players: [],

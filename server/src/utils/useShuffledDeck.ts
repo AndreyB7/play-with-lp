@@ -1,6 +1,6 @@
 import {v4 as uuidv4} from 'uuid';
 
-export const deckCartCount = {
+export const deckCartCount: {[key: string]: number } = {
   a: 10,
   b: 2,
   c: 2,
@@ -34,7 +34,7 @@ export const deckCartCount = {
   qu: 2
 }
 
-export const deckCartScore = {
+export const deckCartScore: {[key: string]: number } = {
   a: 2,
   b: 8,
   c: 5,
@@ -70,7 +70,7 @@ export const deckCartScore = {
 
 function getDeck(): Deck {
   const letters = Object.keys(deckCartCount);
-  const result = [];
+  const result: Deck = [];
   letters.map(letter => {
     for (let i = 0; i < deckCartCount[letter]; i++) {
       result.push({id: uuidv4(), label: letter, score: deckCartScore[letter]})

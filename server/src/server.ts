@@ -2,7 +2,7 @@ import express, {Express} from 'express';
 import {Server} from "socket.io";
 import {createServer} from 'http';
 import * as process from "process";
-import { onConnection } from "./socket";
+import { onConnection } from "./socket/socket";
 require('dotenv').config();
 
 const app: Express = express();
