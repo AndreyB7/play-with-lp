@@ -1,6 +1,7 @@
 .next
 docker
 node_modules
+dist
 
 .gitignore
 Makefile
