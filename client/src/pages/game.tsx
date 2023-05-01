@@ -6,7 +6,6 @@ import withPrivateRoute from '../components/withPrivateRoute';
 import { useRouter } from "next/router";
 
 let socketGame;
-let wasUnautorized = false;
 
 const Game = () => {
 
@@ -15,6 +14,7 @@ const Game = () => {
 
   const [game, setGame] = useState<Game | null>(null);
   const [connection, setConnection] = useState<boolean>(true);
+  const [wasUnauthorized, setWasUnauthorized] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -30,8 +30,7 @@ const Game = () => {
   }, []);
 
   const socketInitializer = async () => {
-    await fetch("/api/socket");
-    socketGame = io(undefined, {
+    socketGame = io(`${process.env.NEXT_PUBLIC_API_HOST}`, {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -39,13 +38,13 @@ const Game = () => {
     });
 
     socketGame.on("unauthorized", (message) => {
-      wasUnautorized = true;
+      setWasUnauthorized(true);
       setError(message);
       router.push('/');
     });
 
     socketGame.on("authorized", () => {
-      wasUnautorized = false;
+      setWasUnauthorized(false);
       socketGame.emit('connect-player', player);
     });
 
@@ -73,7 +72,7 @@ const Game = () => {
     socketGame.on("disconnect", () => {
       // try to refresh page and reconnect
       // TODO check reconnect with login and in-game reload
-      if (wasUnautorized && attempts > 0) {
+      if (wasUnauthorized && attempts > 0) {
         socketGame.emit('connect-player', player);
         attempts--;
         console.log(attempts);

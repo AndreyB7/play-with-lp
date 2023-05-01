@@ -1,4 +1,4 @@
-function binarySearch(array, target) {
+function binarySearch(array: string[], target: string) {
   let startIndex = 0;
   let endIndex = array.length - 1;
   while (startIndex <= endIndex) {
