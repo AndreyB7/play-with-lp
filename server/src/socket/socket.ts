@@ -24,10 +24,9 @@ const limitPlayersCount = parseInt(process.env.LIMIT_PLAYERS_COUNT, 10) || 8;
 const currentGame: Game = { ...initGame };
 const globalPlayersList: Array<Player> = [];
 
-
-const { countRoundScore, countGameScore } = useScoreCount();
-
 export const onConnection = (socket: Socket) => {
+
+  const { countRoundScore, countGameScore } = useScoreCount();
 
   socket.on('access', (passkey: string) => {
     if (passkey === process.env.PASSWORD) {
