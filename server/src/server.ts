@@ -15,12 +15,15 @@ app.get('/', (req, res) => {
 })
 
 const io = new Server(server, {
+  path: '/api/socket.io',
   cors: {
     origin: process.env.CLIENT_HOST,
   }
 });
 
-io.on('connection', (socket) => {
+io
+  .of('api')
+  .on('connection', (socket) => {
   console.log('socked connected', socket.id);
   onConnection(socket);
 })

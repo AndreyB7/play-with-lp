@@ -30,7 +30,8 @@ const Game = () => {
   }, []);
 
   const socketInitializer = async () => {
-    socketGame = io(`${process.env.NEXT_PUBLIC_API_HOST}`, {
+    socketGame = io(`${process.env.NEXT_PUBLIC_API_HOST}/api`, {
+      path: '/api/socket.io',
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,

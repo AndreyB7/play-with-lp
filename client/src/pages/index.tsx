@@ -38,7 +38,7 @@ export default function Home() {
           width='540'
           height='300'
           src="/QQ-logo-sign-in@2x.png"
-          unoptimized
+          priority
           alt='logo'
         />
         <div className='text mw-5 mb-6'>
