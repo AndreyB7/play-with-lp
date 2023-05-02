@@ -10,16 +10,16 @@ const port = 3001;
 
 const server = createServer(app);
 
-app.get('/api/status', (req, res) => {
-  res.json({api:'ok'});
-})
-
 const io = new Server(server, {
   path: '/api/socket.io',
   cors: {
     origin: process.env.CLIENT_HOST,
   }
 });
+
+app.get('*', (req, res) => {
+  res.json({api:'ok'});
+})
 
 io
   .of('api')
