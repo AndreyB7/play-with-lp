@@ -10,7 +10,7 @@ const port = 3001;
 
 const server = createServer(app);
 
-app.get('/', (req, res) => {
+app.get('/api/status', (req, res) => {
   res.json({api:'ok'});
 })
 

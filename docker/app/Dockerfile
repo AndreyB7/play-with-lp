@@ -5,7 +5,11 @@ ENV GENERATE_SOURCEMAP false
 
 VOLUME ["/app"]
 
-WORKDIR /app
+WORKDIR /app/server
+CMD ["yarn", "start"]
+
+WORKDIR /app/client
+CMD ["yarn", "start"]
 
 EXPOSE 3000
-CMD ["yarn", "start"]
+EXPOSE 3001
