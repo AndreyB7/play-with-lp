@@ -90,3 +90,9 @@ systemctl status nginx
 ```
 ### Certbot SSL setup
 https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/
+
+### Live setup notes:
+to project root:
+```shell
+cd /opt/game/play-with-lp/
+```
