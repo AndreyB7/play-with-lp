@@ -34,14 +34,10 @@ export default function Home() {
   return (
     <div className="flex items-center p-4 mx-auto min-h-screen justify-center flex-wrap">
       <main className="gap-4 flex flex-col items-center justify-center w-full h-full">
-        <Image
-          width='540'
-          height='300'
-          src="/QQ-logo-sign-in@2x.png"
-          unoptimized
-        />
+        <h1>I Has Word</h1>
         <div className='text mw-5 mb-6'>
-          <p>Welcome to I Has Word! The ONLY way to play "I Has Word!" online with friends or loved ones.</p>
+          <p>Welcome to I Has Word!</p>
+          <p>The ONLY way to play "I Has Word!" online with friends or loved ones.</p>
           <p>Please note, this version has a few bugs and little kinks still to work out. Please be patient if you encounter a bug and report it to <a href='mailto:loren@brightbase.co' target='_blank'>loren@brightbase.co</a>.
           </p>
           <p>Thank you for playing and enjoy!</p>

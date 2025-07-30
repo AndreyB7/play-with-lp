@@ -38,6 +38,10 @@ function MyApp({ Component , pageProps  }) {
                         content: "initial-scale=1.0, width=device-width"
                     }),
                     /*#__PURE__*/ jsx_runtime_.jsx("link", {
+                        href: "https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap",
+                        rel: "stylesheet"
+                    }),
+                    /*#__PURE__*/ jsx_runtime_.jsx("link", {
                         rel: "shortcut icon",
                         href: "favicon.svg"
                     })

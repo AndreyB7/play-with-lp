@@ -40,6 +40,15 @@ hr {
     z-index: 0;
 }
 
+h1 {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(24px, 15vw, 100px);
+    line-height: 1;
+    margin: .5em 0;
+    color: #f4eb03;
+    text-shadow: 0 0 .1em rgb(0 0 0 / 30%);
+}
+
 /* drag-move workarounds */
 .table-drag-wrap.someOver > *,
 .drop-drag-wrap.someOver > * {
@@ -302,7 +311,7 @@ button.main.mw-200 {
 }
 
 .text p:not(:last-of-type) {
-    margin-bottom: .25rem;
+    margin-bottom: .5rem;
 }
 
 .text a {
