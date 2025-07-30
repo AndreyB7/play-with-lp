@@ -41,8 +41,8 @@ export default function Home() {
           unoptimized
         />
         <div className='text mw-5 mb-6'>
-          <p>Welcome to Quiddler Queen! The ONLY way to play quiddler online with friends or loved ones.</p>
-          <p>Please note, this version has a few bugs and little kinks still to work out. Please be patient if you encounter a bug and report it to <a href='mailto:loren@lorenpolster.com' target='_blank'>loren@lorenpolster.com</a>.
+          <p>Welcome to I Has Word! The ONLY way to play "I Has Word!" online with friends or loved ones.</p>
+          <p>Please note, this version has a few bugs and little kinks still to work out. Please be patient if you encounter a bug and report it to <a href='mailto:loren@brightbase.co' target='_blank'>loren@brightbase.co</a>.
           </p>
           <p>Thank you for playing and enjoy!</p>
         </div>
